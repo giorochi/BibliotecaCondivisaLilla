@@ -11,8 +11,9 @@
       const SUPABASE_URL = "https://mzseglsfxnhviquiuqwa.supabase.co/rest/v1/";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16c2VnbHNmeG5odmlxdWl1cXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMDU0MDcsImV4cCI6MjA5NDY4MTQwN30.o83O01f0_15niF96RPQeRIc9M7nl2T5W2H9vCM5zZQs";
       
-      // Inizializzazione UNICA e globale del client
-      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // NOTA: Usiamo un nome univoco (supabaseClient) per evitare che JavaScript vada in confusione 
+      // e sovrascriva l'oggetto nativo 'supabase' caricato dalla libreria CDN.
+      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,7 +43,7 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height:6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        /* Touch-friendly sizes: ensure tappable targets are >=44-48px */
+        /* Touch-friendly sizes */
         button, .px-6, .px-8 { min-height: 48px; padding-top: 0.6rem; padding-bottom: 0.6rem; }
         .rounded-2xl { touch-action: manipulation; }
 
@@ -50,11 +51,9 @@
         #modal { padding: 1rem; }
         #modal-container { max-height: 92vh; overflow:auto; border-radius: 2rem; transition: transform .18s ease, opacity .18s ease; -webkit-overflow-scrolling: touch; }
 
-        /* Header avatar and text scalable */
         header img { max-height: 56px; }
         #user-display { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
 
-        /* Grid behaviour: ensure single column on narrow devices to avoid horizontal squeeze */
         @media (max-width: 640px) {
             .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
             header { padding: 0.75rem 0.75rem; }
@@ -67,9 +66,7 @@
             #modal-container::-webkit-scrollbar { width: 6px; }
             footer { font-size: 11px; bottom:8px; }
 
-            .flex.flex-wrap.gap-3 > button {
-                flex: 1 1 100%;
-            }
+            .flex.flex-wrap.gap-3 > button { flex: 1 1 100%; }
             #history-container .bg-white { padding: 0.5rem; }
             #history-container table { display: block; width: 100%; -webkit-overflow-scrolling: touch; }
             #history-container thead { display: none; } 
@@ -246,19 +243,17 @@
     </div>
 
     <script>
-        // Stato globale dell'utente autenticato
         let currentUserEmail = "";
         let currentUserName = "";
 
-        // Esegui la verifica della sessione in tempo reale all'avvio dell'applicazione
+        // Verifica in tempo reale con la variabile client corretta
         window.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Legge in modo sicuro lo stato dell'utente tramite l'SDK globale
-                const { data: { session } } = await supabase.auth.getSession();
+                // Utilizza supabaseClient impostato in cima
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
-                    // Reindirizza al login pulito di Google se lo studente non è loggato
-                    await supabase.auth.signInWithOAuth({
+                    await supabaseClient.auth.signInWithOAuth({
                         provider: 'google',
                         options: { redirectTo: window.location.href }
                     });
@@ -267,8 +262,7 @@
 
                 currentUserEmail = session.user.email;
                 
-                // Recupera le informazioni estese dal database Supabase per mostrare il nome reale
-                const { data: profile } = await supabase
+                const { data: profile } = await supabaseClient
                     .from('profiles')
                     .select('*')
                     .eq('email', currentUserEmail)
@@ -277,12 +271,10 @@
                 if (profile && (profile.name || profile.surname)) {
                     currentUserName = (profile.name + " " + profile.surname).trim();
                 } else {
-                    // Fallback sul prefisso email se lo studente non ha ancora salvato il profilo
                     let local = currentUserEmail.split('@')[0] || currentUserEmail;
                     currentUserName = local.replace(/[._]/g, ' ').split(' ').map(w => w ? (w.charAt(0).toUpperCase() + w.slice(1)) : '').join(' ').trim();
                 }
 
-                // Avvia la logica grafica originale della tua applicazione
                 if (typeof initApp === "function") {
                     initApp();
                 }
@@ -291,8 +283,7 @@
             }
         });
 
-        // TRUCCO DI COMPATIBILITÀ: "Inganna" il codice grafico intercettando i vecchi 
-        // comandi google.script.run e mappandoli in background su Supabase.
+        // TRUCCO DI COMPATIBILITÀ: Dirotta google.script.run verso supabaseClient
         window.google = {
             script: {
                 run: {
@@ -310,10 +301,9 @@
 
                     loadAllData: async function() {
                         try {
-                            const { data: books } = await supabase.from('books').select('*').order('timestamp', { ascending: false });
-                            const { data: movements } = await supabase.from('movements').select('*').order('timestamp', { ascending: false });
+                            const { data: books } = await supabaseClient.from('books').select('*').order('timestamp', { ascending: false });
+                            const { data: movements } = await supabaseClient.from('movements').select('*').order('timestamp', { ascending: false });
                             
-                            // Adatta i campi di Supabase al formato esatto richiesto dalla grafica nativa
                             const mappedBooks = (books || []).map(b => ({
                                 id: String(b.id),
                                 title: String(b.title || ""),
@@ -341,13 +331,13 @@
                     addBook: async function(payload) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            const { data: newBook, error } = await supabase.from('books').insert([{
+                            const { data: newBook, error } = await supabaseClient.from('books').insert([{
                                 title: payload.title, authors: payload.authors, subject: payload.subject,
                                 owner_email: currentUserEmail, owner_name: currentUserName, status: 'Disponibile', timestamp: time
                             }]).select().single();
                             if (error) throw error;
                             
-                            await supabase.from('movements').insert([{
+                            await supabaseClient.from('movements').insert([{
                                 book_id: newBook.id, book_title: payload.title, type: 'DONAZIONE',
                                 operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
                             }]);
@@ -358,9 +348,9 @@
                     withdrawBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            const { data: book } = await supabase.from('books').select('*').eq('id', bookId).single();
-                            await supabase.from('books').update({ status: 'Ritirato', borrower_email: currentUserEmail, borrower_name: currentUserName }).eq('id', bookId);
-                            await supabase.from('movements').insert([{
+                            const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
+                            await supabaseClient.from('books').update({ status: 'Ritirato', borrower_email: currentUserEmail, borrower_name: currentUserName }).eq('id', bookId);
+                            await supabaseClient.from('movements').insert([{
                                 book_id: bookId, book_title: book.title, type: 'RITIRO',
                                 operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
                             }]);
@@ -371,19 +361,17 @@
                     exchangeBook: async function(bookId, newTitle, newAuthor) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            const { data: book } = await supabase.from('books').select('*').eq('id', bookId).single();
+                            const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
                             
-                            // Marca il vecchio libro come scambiato
-                            await supabase.from('books').update({ status: 'scambiato' }).eq('id', bookId);
+                            await supabaseClient.from('books').update({ status: 'scambiato' }).eq('id', bookId);
                             
-                            // Inserisce il nuovo libro donato
-                            const { data: newBook } = await supabase.from('books').insert([{
+                            const { data: newBook } = await supabaseClient.from('books').insert([{
                                 title: newTitle, authors: newAuthor, status: 'Disponibile',
                                 owner_email: currentUserEmail, owner_name: currentUserName, timestamp: time
                             }]).select().single();
 
                             const detail = `Ritirato: ${book.title} → Donato: ${newTitle}`;
-                            await supabase.from('movements').insert([{
+                            await supabaseClient.from('movements').insert([{
                                 book_id: newBook.id, book_title: detail, type: 'SCAMBIO',
                                 operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
                             }]);
@@ -394,9 +382,9 @@
                     returnBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            const { data: book } = await supabase.from('books').select('*').eq('id', bookId).single();
-                            await supabase.from('books').update({ status: 'Disponibile', borrower_email: null, borrower_name: null }).eq('id', bookId);
-                            await supabase.from('movements').insert([{
+                            const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
+                            await supabaseClient.from('books').update({ status: 'Disponibile', borrower_email: null, borrower_name: null }).eq('id', bookId);
+                            await supabaseClient.from('movements').insert([{
                                 book_id: bookId, book_title: book.title, type: 'RESTITUZIONE',
                                 operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
                             }]);
@@ -406,14 +394,14 @@
 
                     getProfile: async function() {
                         try {
-                            const { data: profile } = await supabase.from('profiles').select('*').eq('email', currentUserEmail).single();
+                            const { data: profile } = await supabaseClient.from('profiles').select('*').eq('email', currentUserEmail).single();
                             if (this.successCallback) this.successCallback(profile || {});
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
 
                     saveProfile: async function(payload) {
                         try {
-                            await supabase.from('profiles').upsert({
+                            await supabaseClient.from('profiles').upsert({
                                 email: currentUserEmail, name: payload.name, surname: payload.surname,
                                 class: payload.class, section: payload.section, year: payload.year
                             });
