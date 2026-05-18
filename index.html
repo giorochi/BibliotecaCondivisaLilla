@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Sostituisci con le tue credenziali reali che trovi sulle impostazioni di Supabase
+  const SUPABASE_URL = "https://mzseglsfxnhviquiuqwa.supabase.co/rest/v1/";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16c2VnbHNmeG5odmlxdWl1cXdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMDU0MDcsImV4cCI6MjA5NDY4MTQwN30.o83O01f0_15niF96RPQeRIc9M7nl2T5W2H9vCM5zZQs";
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Base fonts + smoothing */
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .serif { font-family: 'Playfair Display', serif; }
+
+        /* Cards */
+        .book-card { transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1); -webkit-tap-highlight-color: transparent; }
+        .book-card:hover { transform: translateY(-8px); box-shadow: 0 14px 20px -6px rgba(0,0,0,0.08), 0 6px 8px -6px rgba(0,0,0,0.06); }
+
+        /* Entrance animation */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-card { animation: slideUp 0.42s ease-out forwards; }
+
+        /* Loader */
+        .loader-spin { border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Colors */
+        .gradient-bg { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+        .gold-border { border-color: #cbb26a; }
+
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height:6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Touch-friendly sizes: ensure tappable targets are >=44-48px */
+        button, .px-6, .px-8 { min-height: 48px; padding-top: 0.6rem; padding-bottom: 0.6rem; }
+        .rounded-2xl { touch-action: manipulation; }
+
+        /* Modal adjustments for mobile */
+        #modal { padding: 1rem; }
+        #modal-container { max-height: 92vh; overflow:auto; border-radius: 2rem; transition: transform .18s ease, opacity .18s ease; -webkit-overflow-scrolling: touch; }
+
+        /* Header avatar and text scalable */
+        header img { max-height: 56px; }
+        #user-display { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+
+        /* Grid behaviour: ensure single column on narrow devices to avoid horizontal squeeze */
+        @media (max-width: 640px) {
+            /* Minimal mobile tweaks while preserving desktop structure and spacing */
+            .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
+            header { padding: 0.75rem 0.75rem; }
+            header img { height:48px; }
+            /* Keep the same heading scale as desktop for consistency */
+            #view-title { font-size: 2.6rem; line-height:1.02; }
+            /* Slightly larger touch targets without changing layout */
+            button { min-height:48px; font-size: 0.95rem; }
+            main { padding: 1rem; margin-top: 0.75rem; }
+            .grid { gap: 1rem; }
+            /* Do NOT override grid-template-columns or forcibly change component structure */
+            /* Keep modal sizing but allow natural responsiveness */
+            #modal-container { max-width: 720px; padding: 1.25rem; max-height: 92vh; }
+            #modal-container::-webkit-scrollbar { width: 6px; }
+            footer { font-size: 11px; bottom:8px; }
+
+            /* Mobile-specific improvements (no change to desktop layout):
+               - Ensure action buttons in controls stack neatly and are aligned
+               - Make history table readable on narrow viewports by rendering rows as cards
+            */
+            .flex.flex-wrap.gap-3 > button {
+                flex: 1 1 100%;
+            }
+            #history-container .bg-white { padding: 0.5rem; }
+            /* Use card-like rows on mobile: make table elements block-level */
+            #history-container table { display: block; width: 100%; -webkit-overflow-scrolling: touch; }
+            #history-container thead { display: none; } /* hide header on small screens to allow compact cards */
+            #history-container tbody { display: block; max-height: 56vh; overflow: auto; }
+            #history-container tr.history-row { display: block; margin-bottom: 0.6rem; background: #fff; border-radius: 1rem; padding: 0.6rem 0.8rem; box-shadow: 0 6px 12px rgba(2,6,23,0.04); }
+            #history-container td { display: block; padding: 6px 0; border: none; }
+            #history-container td:first-child { color: #94a3b8; font-size: 12px; }
+            #history-container td:nth-child(2) { font-weight: 800; color: #0f172a; }
+            #history-container td:nth-child(3) { padding-top: 6px; }
+            #history-container td:nth-child(4) { font-style: italic; color: #334155; padding-top: 6px; }
+            #history-container td.p-6 { padding: 0.6rem 0; }
+        }
+
+        /* Prefer reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-card, .book-card, #modal-container { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-[#fcfdfe] text-slate-900 min-h-screen">
+
+    <!-- Schermata di Caricamento -->
+    <div id="loader" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center transition-opacity duration-500">
+        <img src="https://iisslilla.edu.it/wp-content/uploads/sites/996/lilla.png?x79845" alt="Logo Lilla" class="h-24 mb-6 animate-pulse">
+        <div class="loader-spin mb-4"></div>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-blue-900 italic">Ponzini Hub - Liceo Lilla</p>
+    </div>
+
+    <!-- Header Istituzionale -->
+    <header class="bg-white/90 backdrop-blur-md border-b-4 gold-border p-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-5">
+                <img src="https://iisslilla.edu.it/wp-content/uploads/sites/996/lilla.png?x79845" alt="Logo Scuola" class="h-16 hidden sm:block">
+                <div class="h-12 w-[2px] bg-slate-100 hidden sm:block"></div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tighter uppercase italic leading-none text-blue-900 serif">Ponzini Hub</h1>
+                    <p class="text-[9px] font-bold text-amber-600 uppercase tracking-[0.2em] mt-1">I.I.S. "Vincenzo Lilla"</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="hidden md:block text-right pr-4 border-r border-slate-100">
+                    <p id="user-display" class="text-[10px] font-black text-slate-600 uppercase italic">Accesso in corso...</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="profile-btn" onclick="openProfileModal()" title="Profilo" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span class="text-[11px] font-black uppercase tracking-wider">Profilo</span>
+                    </button>
+                    <div id="avatar" onclick="openProfileModal()" role="button" aria-label="Apri profilo" class="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center font-bold text-white text-lg shadow-lg border-2 border-white cursor-pointer">?</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-6 mt-10">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-16">
+            <div class="animate-card">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-12 h-1.5 bg-amber-500 rounded-full"></div>
+                    <span class="text-amber-600 font-black uppercase text-[10px] tracking-[0.3em]">Biblioteca Scolastica</span>
+                </div>
+                <h2 id="view-title" class="text-5xl font-black tracking-tighter uppercase italic text-blue-900 serif mb-4">Catalogo Libri</h2>
+                <p class="text-slate-400 text-xs font-medium max-w-md">Sistema di scambio e condivisione per gli studenti del Liceo Classico e Scientifico "Vincenzo Lilla".</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto bg-slate-50 p-2 rounded-[2rem] border border-slate-100 shadow-inner items-center">
+                <button onclick="switchView('catalog')" id="btn-catalog" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900">Catalogo</button>
+                <button onclick="switchView('my-books')" id="btn-my-books" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-blue-900">I miei prestiti</button>
+                <button onclick="switchView('history')" id="btn-history" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-blue-900">Movimenti</button>
+                <div id="header-search" class="flex-1 min-w-[200px]">
+                    <input id="search-input" oninput="onSearchInput()" placeholder="Cerca nel fondo comune..." class="w-full bg-white border border-slate-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-amber-200" />
+                </div>
+                <button onclick="openModal('dona')" class="gradient-bg text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:brightness-110 transition-all active:scale-95 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Aggiungi
+                </button>
+            </div>
+        </div>
+
+        <!-- Book Grid / History View -->
+        <div id="books-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 pb-32">
+            <!-- Populated via JS -->
+        </div>
+
+        <!-- History Container (Hidden by default) -->
+        <div id="history-container" class="hidden pb-32">
+            <div class="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden p-6">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <div class="flex-1">
+                        <input id="history-search" oninput="onHistorySearchInput()" placeholder="Cerca movimenti per titolo..." class="w-full bg-slate-50 border border-slate-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-amber-200" />
+                    </div>
+                    <div class="text-sm text-slate-400 italic font-bold">Filtra per titolo movimento</div>
+                </div>
+                <div class="overflow-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Data e Ora</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Studente</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Azione</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Dettagli Operazione</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body" class="text-sm font-medium">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Form -->
+    <div id="modal" class="fixed inset-0 bg-blue-900/40 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl p-10 relative overflow-hidden transition-all transform scale-95 opacity-0 border-t-8 gold-border" id="modal-container" style="max-height:92vh; overflow:auto;">
+            <div class="mb-8">
+                <h3 id="modal-title" class="font-black uppercase text-2xl tracking-tighter italic text-blue-900 serif">Dona un libro</h3>
+                <p class="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Inserisci i dati nel registro scolastico</p>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-widest">Titolo dell'opera</label>
+                    <input id="book-title" class="w-full bg-slate-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-amber-500 focus:bg-white transition-all text-sm" placeholder="es. I Promessi Sposi">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-widest">Autore / Curatore</label>
+                    <input id="book-author" class="w-full bg-slate-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-amber-500 focus:bg-white transition-all text-sm" placeholder="es. Alessandro Manzoni">
+                </div>
+                <div class="flex gap-4 pt-6">
+                    <button onclick="closeModal()" class="flex-1 py-5 font-black text-slate-400 uppercase text-[10px] tracking-widest hover:text-slate-600 transition-colors">Annulla</button>
+                    <button id="submit-btn" onclick="submitBook()" class="flex-1 py-5 gradient-bg text-white font-black rounded-2xl shadow-xl uppercase text-[10px] tracking-widest hover:brightness-110 transition-all">Conferma Registrazione</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/35 z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-6 relative overflow-hidden transition-all transform scale-95 opacity-0 border-t-4 gold-border" style="max-height:90vh; overflow:auto;" id="profile-container">
+            <div class="mb-4">
+                <h3 class="font-black uppercase text-lg tracking-tighter italic text-blue-900 serif">Il mio Profilo</h3>
+                <p class="text-[9px] text-slate-400 uppercase mt-1 tracking-widest">Modifica i tuoi dati (salvati localmente all'account)</p>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Nome</label>
+                    <input id="profile-name" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="Nome">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Cognome</label>
+                    <input id="profile-surname" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="Cognome">
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Classe</label>
+                        <input id="profile-class" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 3">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Sezione</label>
+                        <input id="profile-section" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. A">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Anno scolastico</label>
+                    <input id="profile-year" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 2025/2026">
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button onclick="closeProfileModal()" class="flex-1 py-3 font-black text-slate-500 uppercase text-[10px] tracking-widest hover:text-slate-700 transition-colors">Annulla</button>
+                    <button id="save-profile-btn" onclick="saveProfile()" class="flex-1 py-3 bg-blue-900 text-white font-black rounded-xl uppercase text-[10px] tracking-widest hover:brightness-110">Salva</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="error-toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl z-[300] hidden animate-card border-b-4 border-red-800">
+        <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p id="error-message" class="text-[11px] font-black uppercase tracking-widest"></p>
+        </div>
+    </div>
+
+    <script>
+        // Stato globale dell'applicazione (sostituisce i vecchi meccanismi di Apps Script)
+let currentUserEmail = "";
+let currentUserName = "";
+
+// Funzione eseguita all'avvio dell'applicazione
+window.addEventListener('DOMContentLoaded', async () => {
+    // 1. Controlla se l'utente è loggato con Supabase Auth
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+        // Se non è loggato, avvia il flusso di login con Google (Zero schermate rosse)
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.href }
+        });
+        return;
+    }
+
+    // Imposta l'utente corrente dall'autenticazione sicura
+    currentUserEmail = session.user.email;
+    
+    // 2. Recupera i dati del profilo per impostare il nome visualizzato
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', currentUserEmail)
+        .single();
+
+    if (profile && (profile.name || profile.surname)) {
+        currentUserName = (profile.name + " " + profile.surname).trim();
+    } else {
+        // Fallback sul nome derivato dall'email se il profilo è vuoto
+        let local = currentUserEmail.split('@')[0] || currentUserEmail;
+        currentUserName = local.replace(/[._]/g, ' ').split(' ').map(w => w ? (w.charAt(0).toUpperCase() + w.slice(1)) : '').join(' ').trim();
+    }
+
+    // Inizializza l'interfaccia grafica originale
+    initApp();
+});
+
+// Sostituzione di google.script.run.getAppData()
+async function getAppData() {
+    return {
+        user: currentUserEmail,
+        userName: currentUserName,
+        isAdmin: false // Gestibile aggiungendo una colonna 'is_admin' nella tabella profiles
+    };
+}
+
+// Sostituzione di google.script.run.loadAllData()
+async function loadAllData() {
+    try {
+        // Scarica i libri
+        const { data: books, error: errBooks } = await supabase
+            .from('books')
+            .select('*')
+            .order('timestamp', { ascending: false });
+
+        // Scarica i movimenti
+        const { data: movements, error: errMovements } = await supabase
+            .from('movements')
+            .select('*')
+            .order('timestamp', { ascending: false });
+
+        if (errBooks || errMovements) throw new Error("Errore nel caricamento dati");
+
+        return {
+            books: books || [],
+            movements: movements || []
+        };
+    } catch (e) {
+        showError("Impossibile caricare i dati dal database");
+        return { books: [], movements: [] };
+    }
+}
+
+// Sostituzione di google.script.run.addBook()
+async function addBook(payload) {
+    try {
+        const timestamp = new Date().toLocaleString('it-IT');
+        
+        // Inserisce il libro su Supabase
+        const { data: newBook, error } = await supabase
+            .from('books')
+            .insert([{
+                title: payload.title,
+                authors: payload.authors,
+                subject: payload.subject,
+                owner_email: currentUserEmail,
+                owner_name: currentUserName,
+                status: 'Disponibile',
+                timestamp: timestamp
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Traccia il movimento in automatico
+        await supabase.from('movements').insert([{
+            book_id: newBook.id,
+            book_title: payload.title,
+            type: 'Donazione',
+            operator_email: currentUserEmail,
+            operator_name: currentUserName,
+            timestamp: timestamp
+        }]);
+
+        return true;
+    } catch (e) {
+        showError("Errore durante l'inserimento del libro");
+        throw e;
+    }
+}
+
+// Sostituzione di google.script.run.withdrawBook()
+async function withdrawBook(bookId) {
+    try {
+        const timestamp = new Date().toLocaleString('it-IT');
+
+        // 1. Recupera il libro per verificarne lo stato e il titolo
+        const { data: book } = await supabase.from('books').select('*').eq('id', bookId).single();
+        if (!book || book.status !== 'Disponibile') throw new Error("Libro non disponibile");
+
+        // 2. Aggiorna lo stato del libro
+        await supabase
+            .from('books')
+            .update({
+                status: 'Ritirato',
+                borrower_email: currentUserEmail,
+                borrower_name: currentUserName
+            })
+            .eq('id', bookId);
+
+        // 3. Scrive il movimento di ritiro
+        await supabase.from('movements').insert([{
+            book_id: bookId,
+            book_title: book.title,
+            type: 'Prelievo',
+            operator_email: currentUserEmail,
+            operator_name: currentUserName,
+            timestamp: timestamp
+        }]);
+
+        return true;
+    } catch (e) {
+        showError("Impossibile completare il ritiro");
+        throw e;
+    }
+}
+
+// Sostituzione di google.script.run.exchangeBook()
+async function exchangeBook(bookId) {
+    try {
+        const timestamp = new Date().toLocaleString('it-IT');
+
+        // 1. Recupera il vecchio stato del libro
+        const { data: book } = await supabase.from('books').select('*').eq('id', bookId).single();
+        if (!book || book.status !== 'Ritirato') throw new Error("Azione non valida");
+
+        // 2. Aggiorna il libro rimettendolo disponibile col nuovo proprietario
+        await supabase
+            .from('books')
+            .update({
+                status: 'Disponibile',
+                owner_email: currentUserEmail,
+                owner_name: currentUserName,
+                borrower_email: null,
+                borrower_name: null
+            })
+            .eq('id', bookId);
+
+        // 3. Scrive il movimento di scambio
+        await supabase.from('movements').insert([{
+            book_id: bookId,
+            book_title: book.title,
+            type: 'Scambio',
+            operator_email: currentUserEmail,
+            operator_name: currentUserName,
+            timestamp: timestamp
+        }]);
+
+        return true;
+    } catch (e) {
+        showError("Impossibile completare lo scambio");
+        throw e;
+    }
+}
+
+// Sostituzione di google.script.run.getProfile()
+async function getProfile() {
+    try {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', currentUserEmail)
+            .single();
+
+        return profile || {};
+    } catch (e) {
+        return {};
+    }
+}
+
+// Sostituzione di google.script.run.saveProfile()
+async function saveProfile(payload) {
+    try {
+        const { error } = await supabase
+            .from('profiles')
+            .upsert({
+                email: currentUserEmail,
+                name: payload.name,
+                surname: payload.surname,
+                class: payload.class,
+                section: payload.section,
+                year: payload.year
+            });
+
+        if (error) throw error;
+        
+        // Aggiorna localmente il nome utente per i log immediati
+        currentUserName = (payload.name + " " + payload.surname).trim();
+        return true;
+    } catch (e) {
+        showError("Impossibile salvare il profilo");
+        throw e;
+    }
+}
+    </script>
+    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
+</body>
+</html>
