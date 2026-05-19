@@ -266,12 +266,18 @@ await supabaseClient.auth.signInWithOAuth({
                 
                 const { data: profile, error: profileErr } = await supabaseClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
 
-                if (profile && (profile.name || profile.surname)) {
+               if (profile && (profile.name || profile.surname)) {
                     currentUserName = (profile.name + " " + profile.surname).trim();
                 } else {
                     let local = currentUserEmail.split('@')[0] || currentUserEmail;
                     currentUserName = local.replace(/[._]/g, ' ').split(' ').map(w => w ? (w.charAt(0).toUpperCase() + w.slice(1)) : '').join(' ').trim();
                 }
+
+                // --- RIGHE AGGIUNTE PER AGGIORNARE LA GRAFICA ALL'AVVIO ---
+                if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserName.toUpperCase();
+                const firstLetter = currentUserName.charAt(0).toUpperCase();
+                if (document.getElementById('avatar')) document.getElementById('avatar').innerText = firstLetter || '?';
+                // ---------------------------------------------------------
 
                 if (typeof initApp === "function") {
                     initApp();
