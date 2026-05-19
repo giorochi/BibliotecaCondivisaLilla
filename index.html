@@ -264,11 +264,7 @@ await supabaseClient.auth.signInWithOAuth({
 
                 currentUserEmail = session.user.email;
                 
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('*')
-                    .eq('email', currentUserEmail)
-                    .single();
+                const { data: profile, error: profileErr } = await supabaseClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
 
                 if (profile && (profile.name || profile.surname)) {
                     currentUserName = (profile.name + " " + profile.surname).trim();
@@ -395,11 +391,11 @@ await supabaseClient.auth.signInWithOAuth({
                     },
 
                     getProfile: async function() {
-                        try {
-                            const { data: profile } = await supabaseClient.from('profiles').select('*').eq('email', currentUserEmail).single();
-                            if (this.successCallback) this.successCallback(profile || {});
-                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
-                    },
+    try {
+        const { data: profile } = await supabaseClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
+        if (this.successCallback) this.successCallback(profile || {});
+    } catch(e) { if (this.failureCallback) this.failureCallback(e); }
+}
 
                     saveProfile: async function(payload) {
                         try {
