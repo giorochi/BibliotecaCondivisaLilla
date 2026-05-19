@@ -276,10 +276,19 @@ await supabaseClient.auth.signInWithOAuth({
                 if (typeof initApp === "function") {
                     initApp();
                 }
-            } catch (err) {
+           } catch (err) {
                 console.error("Errore critico durante l'avvio della sessione:", err);
             }
         });
+
+        // Funzione per avviare l'applicazione e sbloccare il loader
+        function initApp() {
+            google.script.run.withSuccessHandler(function(data) {
+                // Nasconde il loader una volta che i dati sono pronti
+                const loader = document.getElementById('loader');
+                if (loader) loader.classList.add('opacity-0'), setTimeout(() => loader.remove(), 500);
+            }).loadAllData();
+        }
 
         // TRUCCO DI COMPATIBILITÀ: Dirotta google.script.run verso supabaseClient
         window.google = {
