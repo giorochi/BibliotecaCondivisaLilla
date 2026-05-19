@@ -302,20 +302,20 @@ await supabaseClient.auth.signInWithOAuth({
                 run: {
                     successCallback: null,
                     failureCallback: null,
-                    withSuccessHandler: function(cb) { this.successCallback = cb; return this; },
-                    withFailureHandler: function(cb) { this.failureCallback = cb; return this; },
-                    
-                    getAppData: async function() {
-                        try {
-                            const data = { user: currentUserEmail, userName: currentUserName, isAdmin: false };
-                            if (this.successCallback) this.successCallback(data);
-                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
+                    withSuccessHandler: function(callback) {
+                        this.successCallback = callback;
+                        return this;
+                    },
+                    withFailureHandler: function(callback) {
+                        this.failureCallback = callback;
+                        return this;
                     },
 
                     loadAllData: async function() {
                         try {
-                            const { data: books } = await supabaseClient.from('books').select('*').order('timestamp', { ascending: false });
-                            const { data: movements } = await supabaseClient.from('movements').select('*').order('timestamp', { ascending: false });
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            const { data: books } = await localClient.from('books').select('*').order('timestamp', { ascending: false });
+                            const { data: movements } = await localClient.from('movements').select('*').order('timestamp', { ascending: false });
                             
                             const mappedBooks = (books || []).map(b => {
                                 return {
@@ -344,14 +344,11 @@ await supabaseClient.auth.signInWithOAuth({
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
 
-                   addBook: async function(payload) {
+                    addBook: async function(payload) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            
-                            // Inizializziamo un'istanza locale super sicura per evitare che perda le chiavi in background
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                            // Registrazione del libro usando l'istanza locale e i campi del tuo DB
                             const { data, error } = await localClient
                                 .from('books')
                                 .insert([
@@ -370,7 +367,6 @@ await supabaseClient.auth.signInWithOAuth({
 
                             if (error) throw error;
 
-                            // Registrazione del movimento nello storico sempre tramite l'istanza locale
                             await localClient.from('movements').insert([
                                 {
                                     book_id: null,
@@ -383,24 +379,22 @@ await supabaseClient.auth.signInWithOAuth({
                             ]);
 
                             if (this.successCallback) this.successCallback(data);
-                        } catch(e) { 
-                            if (this.failureCallback) this.failureCallback(e); 
-                        }
+                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
-                    
+
                     withdrawBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
                             
-                            // Aggiorna lo stato usando i campi corretti del tuo DB
-                            await supabaseClient.from('books').update({ 
+                            await localClient.from('books').update({ 
                                 status: 'Ritirato', 
                                 borrower_email: currentUserEmail, 
                                 borrower_name: currentUserName || currentUserEmail.split('@')[0] 
                             }).eq('id', bookId);
 
-                            await supabaseClient.from('movements').insert([{
+                            await localClient.from('movements').insert([{
                                 book_id: bookId, 
                                 book_title: book.title, 
                                 type: 'RITIRO',
@@ -408,7 +402,6 @@ await supabaseClient.auth.signInWithOAuth({
                                 operator_name: currentUserName || currentUserEmail.split('@')[0], 
                                 timestamp: time
                             }]);
-                            
                             if (this.successCallback) this.successCallback();
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
@@ -416,11 +409,12 @@ await supabaseClient.auth.signInWithOAuth({
                     exchangeBook: async function(bookId, newTitle, newAuthor) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
                             
-                            await supabaseClient.from('books').update({ status: 'scambiato' }).eq('id', bookId);
+                            await localClient.from('books').update({ status: 'scambiato' }).eq('id', bookId);
                             
-                            const { data: newBook } = await supabaseClient.from('books').insert([{
+                            const { data: newBook } = await localClient.from('books').insert([{
                                 title: newTitle, 
                                 authors: newAuthor, 
                                 status: 'disponibile',
@@ -430,7 +424,7 @@ await supabaseClient.auth.signInWithOAuth({
                             }]).select().single();
 
                             const detail = `Ritirato: ${book.title} → Donato: ${newTitle}`;
-                            await supabaseClient.from('movements').insert([{
+                            await localClient.from('movements').insert([{
                                 book_id: newBook.id, 
                                 book_title: detail, 
                                 type: 'SCAMBIO',
@@ -445,16 +439,16 @@ await supabaseClient.auth.signInWithOAuth({
                     returnBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
-                            const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
                             
-                            // Ripristina lo stato a disponibile e svuota i campi del borrower
-                            await supabaseClient.from('books').update({ 
+                            await localClient.from('books').update({ 
                                 status: 'disponibile', 
                                 borrower_email: null, 
                                 borrower_name: null 
                             }).eq('id', bookId);
 
-                            await supabaseClient.from('movements').insert([{
+                            await localClient.from('movements').insert([{
                                 book_id: bookId, 
                                 book_title: book.title, 
                                 type: 'RESTITUZIONE',
@@ -465,21 +459,28 @@ await supabaseClient.auth.signInWithOAuth({
                             if (this.successCallback) this.successCallback();
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
+
                     getProfile: async function() {
-    try {
-        const { data: profile } = await supabaseClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
-        if (this.successCallback) this.successCallback(profile || {});
-    } catch(e) { if (this.failureCallback) this.failureCallback(e); }
-},
+                        try {
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            const { data: profile } = await localClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
+                            if (this.successCallback) this.successCallback(profile || {});
+                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
+                    },
 
                     saveProfile: async function(payload) {
                         try {
-                            await supabaseClient.from('profiles').upsert({
-                                email: currentUserEmail, name: payload.name, surname: payload.surname,
-                                class: payload.class, section: payload.section, year: payload.year
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            const { data, error } = await localClient.from('profiles').upsert({
+                                email: currentUserEmail,
+                                name: payload.name,
+                                surname: payload.surname,
+                                class: payload.class,
+                                section: payload.section,
+                                year: payload.year
                             });
-                            currentUserName = (payload.name + " " + payload.surname).trim();
-                            if (this.successCallback) this.successCallback();
+                            if (error) throw error;
+                            if (this.successCallback) this.successCallback(data);
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     }
                 }
