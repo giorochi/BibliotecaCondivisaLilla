@@ -344,12 +344,15 @@ await supabaseClient.auth.signInWithOAuth({
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
 
-                    addBook: async function(payload) {
+                   addBook: async function(payload) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             
-                            // Registrazione del libro usando i campi del tuo database
-                            const { data, error } = await supabaseClient
+                            // Inizializziamo un'istanza locale super sicura per evitare che perda le chiavi in background
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                            // Registrazione del libro usando l'istanza locale e i campi del tuo DB
+                            const { data, error } = await localClient
                                 .from('books')
                                 .insert([
                                     { 
@@ -367,10 +370,10 @@ await supabaseClient.auth.signInWithOAuth({
 
                             if (error) throw error;
 
-                            // Registrazione del movimento nello storico
-                            await supabaseClient.from('movements').insert([
+                            // Registrazione del movimento nello storico sempre tramite l'istanza locale
+                            await localClient.from('movements').insert([
                                 {
-                                    book_id: null, // Sarà generato seriale o lasciato null per la donazione
+                                    book_id: null,
                                     book_title: payload.title,
                                     type: 'DONAZIONE',
                                     operator_email: currentUserEmail,
