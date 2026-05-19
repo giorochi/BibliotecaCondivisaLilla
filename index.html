@@ -349,7 +349,8 @@ await supabaseClient.auth.signInWithOAuth({
                             const time = new Date().toLocaleString('it-IT');
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                            const { data, error } = await localClient
+                            // 1. Inseriamo prima il libro e chiediamo a Supabase di restituirci i dati appena creati (.select())
+                            const { data: newBook, error: bookError } = await localClient
                                 .from('books')
                                 .insert([
                                     { 
@@ -363,14 +364,14 @@ await supabaseClient.auth.signInWithOAuth({
                                         subject: "",
                                         timestamp: time
                                     }
-                                ]);
+                                ]).select().single(); // Prende il singolo record creato con il suo nuovo ID reale
 
-                            if (error) throw error;
+                            if (bookError) throw bookError;
 
-                            // Correggiamo le colonne inviate a movements combaciando con lo schema DB
+                            // 2. Ora che abbiamo l'ID reale (newBook.id), registriamo il movimento senza inviare null!
                             await localClient.from('movements').insert([
                                 {
-                                    book_id: null,
+                                    book_id: newBook.id, // <-- ID REALE DEL LIBRO APPENA CREATO
                                     book_title: payload.title,
                                     type: 'DONAZIONE',
                                     operator_email: currentUserEmail,
@@ -378,6 +379,48 @@ await supabaseClient.auth.signInWithOAuth({
                                     timestamp: time
                                 }
                             ]);
+
+                            if (this.successCallback) this.successCallback(newBook);
+                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
+                    },
+
+                    exchangeBook: async function(bookId, newTitle, newAuthor) {
+                        try {
+                            const time = new Date().toLocaleString('it-IT');
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            
+                            // 1. Recuperiamo il vecchio libro che l'utente sta scambiando
+                            const { data: oldBook } = await localClient.from('books').select('*').eq('id', bookId).single();
+                            
+                            // 2. Aggiorniamo lo stato del vecchio libro in 'Scambiato'
+                            await localClient.from('books').update({ status: 'Scambiato' }).eq('id', bookId);
+                            
+                            // 3. Inseriamo il nuovo libro donato in cambio
+                            const { data: newBook, error: newBookError } = await localClient.from('books').insert([{
+                                title: newTitle, 
+                                authors: newAuthor, 
+                                status: 'disponibile',
+                                owner_email: currentUserEmail, 
+                                owner_name: currentUserName || currentUserEmail.split('@')[0], 
+                                timestamp: time
+                            }]).select().single();
+
+                            if (newBookError) throw newBookError;
+
+                            // 4. Registriamo il movimento di scambio collegandolo al nuovo libro
+                            const detail = `Ritirato: ${oldBook.title} → Donato: ${newTitle}`;
+                            await localClient.from('movements').insert([{
+                                book_id: newBook.id, 
+                                book_title: detail, 
+                                type: 'SCAMBIO',
+                                operator_email: currentUserEmail, 
+                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                timestamp: time
+                            }]);
+                            
+                            if (this.successCallback) this.successCallback();
+                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
+                    },
 
                             if (this.successCallback) this.successCallback(data);
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
@@ -407,36 +450,7 @@ await supabaseClient.auth.signInWithOAuth({
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
 
-                    exchangeBook: async function(bookId, newTitle, newAuthor) {
-                        try {
-                            const time = new Date().toLocaleString('it-IT');
-                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
-                            
-                            await localClient.from('books').update({ status: 'scambiato' }).eq('id', bookId);
-                            
-                            const { data: newBook } = await localClient.from('books').insert([{
-                                title: newTitle, 
-                                authors: newAuthor, 
-                                status: 'disponibile',
-                                owner_email: currentUserEmail, 
-                                owner_name: currentUserName || currentUserEmail.split('@')[0], 
-                                timestamp: time
-                            }]).select().single();
-
-                            const detail = `Ritirato: ${book.title} → Donato: ${newTitle}`;
-                            await localClient.from('movements').insert([{
-                                book_id: newBook.id, 
-                                book_title: detail, 
-                                type: 'SCAMBIO',
-                                operator_email: currentUserEmail, 
-                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
-                                timestamp: time
-                            }]);
-                            if (this.successCallback) this.successCallback();
-                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
-                    },
-
+                   
                     returnBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
@@ -519,7 +533,13 @@ await supabaseClient.auth.signInWithOAuth({
             if (booksList.length === 0) {
                 grid.innerHTML = `<p class="text-slate-400 text-sm italic col-span-full text-center py-10">Nessun libro trovato.</p>`;
                 return;
-            }
+            } else if (book.currentHolder === currentUserEmail) {
+                    actionButton = `
+                        <div class="flex flex-col gap-2 mt-4">
+                            <button onclick="returnBook('${book.id}')" class="w-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>
+                            <button onclick="promptExchange('${book.id}')" class="w-full bg-amber-600 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Scambia Libro</button>
+                        </div>
+                    `;
 
             booksList.forEach(book => {
                 const isDisponibile = book.status === 'disponibile';
@@ -748,6 +768,18 @@ await supabaseClient.auth.signInWithOAuth({
                 if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
                 closeProfileModal();
             }).saveProfile(payload);
+        }
+            // Funzione di supporto per lo Scambio
+        function promptExchange(bookId) {
+            const newTitle = prompt("Inserisci il TITOLO del nuovo libro che vuoi lasciare in cambio:");
+            if (!newTitle) return;
+            const newAuthor = prompt("Inserisci l'AUTORE del nuovo libro:");
+            if (!newAuthor) return;
+
+            window.google.script.run.withSuccessHandler(function() {
+                alert("Scambio registrato con successo!");
+                initApp();
+            }).exchangeBook(bookId, newTitle.trim(), newAuthor.trim());
         }
     </script>
     <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
