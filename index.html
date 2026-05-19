@@ -13,7 +13,7 @@
       
       // NOTA: Usiamo un nome univoco (supabaseClient) per evitare che JavaScript vada in confusione 
       // e sovrascriva l'oggetto nativo 'supabase' caricato dalla libreria CDN.
-      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+     const supabaseClient = supabase.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);;
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
