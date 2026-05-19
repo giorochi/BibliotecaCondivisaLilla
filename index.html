@@ -344,11 +344,12 @@ await supabaseClient.auth.signInWithOAuth({
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
 
-                    addBook: async function(payload) {
+                   addBook: async function(payload) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+                            // 1. Inseriamo il libro e recuperiamo l'ID generato da Supabase (.select())
                             const { data: newBook, error: bookError } = await localClient
                                 .from('books')
                                 .insert([
@@ -367,6 +368,7 @@ await supabaseClient.auth.signInWithOAuth({
 
                             if (bookError) throw bookError;
 
+                            // 2. Usiamo l'ID reale (newBook.id) così la chiave esterna della tabella movements non va in errore 400
                             await localClient.from('movements').insert([
                                 {
                                     book_id: newBook.id,
@@ -381,7 +383,6 @@ await supabaseClient.auth.signInWithOAuth({
                             if (this.successCallback) this.successCallback(newBook);
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
-
                     withdrawBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
@@ -406,6 +407,30 @@ await supabaseClient.auth.signInWithOAuth({
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
 
+                    
+                    returnBook: async function(bookId) {
+                        try {
+                            const time = new Date().toLocaleString('it-IT');
+                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
+                            
+                            await localClient.from('books').update({ 
+                                status: 'disponibile', 
+                                borrower_email: null, 
+                                borrower_name: null 
+                            }).eq('id', bookId);
+
+                            await localClient.from('movements').insert([{
+                                book_id: parseInt(bookId), 
+                                book_title: book.title, 
+                                type: 'RESTITUZIONE',
+                                operator_email: currentUserEmail, 
+                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                timestamp: time
+                            }]);
+                            if (this.successCallback) this.successCallback();
+                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
+                    },
                     exchangeBook: async function(bookId, newTitle, newAuthor) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
@@ -430,31 +455,6 @@ await supabaseClient.auth.signInWithOAuth({
                                 book_id: newBook.id, 
                                 book_title: detail, 
                                 type: 'SCAMBIO',
-                                operator_email: currentUserEmail, 
-                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
-                                timestamp: time
-                            }]);
-                            
-                            if (this.successCallback) this.successCallback();
-                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
-                    },
-
-                    returnBook: async function(bookId) {
-                        try {
-                            const time = new Date().toLocaleString('it-IT');
-                            const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
-                            
-                            await localClient.from('books').update({ 
-                                status: 'disponibile', 
-                                borrower_email: null, 
-                                borrower_name: null 
-                            }).eq('id', bookId);
-
-                            await localClient.from('movements').insert([{
-                                book_id: parseInt(bookId), 
-                                book_title: book.title, 
-                                type: 'RESTITUZIONE',
                                 operator_email: currentUserEmail, 
                                 operator_name: currentUserName || currentUserEmail.split('@')[0], 
                                 timestamp: time
