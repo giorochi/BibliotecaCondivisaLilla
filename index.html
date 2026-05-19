@@ -317,38 +317,28 @@ await supabaseClient.auth.signInWithOAuth({
                             const { data: books } = await supabaseClient.from('books').select('*').order('timestamp', { ascending: false });
                             const { data: movements } = await supabaseClient.from('movements').select('*').order('timestamp', { ascending: false });
                             
-                            const mappedBooks = (books || []).map(b => ({
-                                id: String(b.id),
-                                title: String(b.title || ""),
-                                author: String(b.authors || ""),
-                                donor: String(b.owner_name || b.owner_email || "Anonimo"),
-                                date: String(b.timestamp || "").split(" ")[0] || "",
-                                status: String(b.status || "disponibile").toLowerCase(),
-                                currentHolder: String(b.borrower_email || "") // Usato per verificare se l'utente loggato ha il libro
-                            }));
+                            const mappedBooks = (books || []).map(b => {
+                                return {
+                                    id: String(b.id),
+                                    title: String(b.title || ""),
+                                    author: String(b.authors || ""),
+                                    donor: String(b.owner_name || b.owner_email || "Anonimo"),
+                                    date: String(b.timestamp || "").split(" ")[0] || "",
+                                    status: String(b.status || "disponibile").toLowerCase(),
+                                    currentHolder: String(b.borrower_email || "")
+                                };
+                            });
 
-                            const mappedMovements = (movements || []).map(m => ({
-                                timestamp: String(m.timestamp || ""),
-                                utente: String(m.operator_name || m.operator_email || "Utente"),
-                                user_email: String(m.operator_email || ""),
-                                azione: String(m.type || "-"),
-                                titolo: String(m.book_title || "Libro"),
-                                book_id: String(m.book_id || "")
-                            }));
-
-                            if (this.successCallback) this.successCallback({ books: mappedBooks, movements: mappedMovements });
-                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
-                    },
-
-                            const mappedMovements = (movements || []).map(m => ({
-                                timestamp: String(m.timestamp || ""),
-                                utente: String(m.operator_name || "Utente"),
-                                user_email: String(m.operator_email || ""),
-                                azione: String(m.type || "-"),
-                                titolo: String(m.book_title || "Libro"),
-                                book_id: String(m.book_id || ""),
-                                bookId: String(m.book_id || "")
-                            }));
+                            const mappedMovements = (movements || []).map(m => {
+                                return {
+                                    timestamp: String(m.timestamp || ""),
+                                    utente: String(m.operator_name || m.operator_email || "Utente"),
+                                    user_email: String(m.operator_email || ""),
+                                    azione: String(m.type || "-"),
+                                    titolo: String(m.book_title || "Libro"),
+                                    book_id: String(m.book_id || "")
+                                };
+                            });
 
                             if (this.successCallback) this.successCallback({ books: mappedBooks, movements: mappedMovements });
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
