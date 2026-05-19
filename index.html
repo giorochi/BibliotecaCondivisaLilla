@@ -376,8 +376,8 @@ await supabaseClient.auth.signInWithOAuth({
     } catch(e) { 
         if (this.failureCallback) this.failureCallback(e); 
     }
-}
-
+},
+                    
                     withdrawBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
