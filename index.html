@@ -485,17 +485,16 @@ await supabaseClient.auth.signInWithOAuth({
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     }
                 }
-            }
+           }
         };
-   </script>
 
-<script>
+        // VARIABILI GLOBALI PER I DATI
         let allBooks = [];
         let allMovements = [];
 
-        // Questa funzione viene chiamata da initApp() non appena Supabase risponde con i dati
+        // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT
         function initApp() {
-            google.script.run.withSuccessHandler(function(data) {
+            window.google.script.run.withSuccessHandler(function(data) {
                 allBooks = data.books || [];
                 allMovements = data.movements || [];
                 
@@ -526,7 +525,6 @@ await supabaseClient.auth.signInWithOAuth({
                 const isDisponibile = book.status === 'disponibile';
                 const badgeColor = isDisponibile ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100';
                 
-                // Determina l'azione del pulsante in base allo stato del libro
                 let actionButton = "";
                 if (isDisponibile) {
                     actionButton = `<button onclick="borrowBook('${book.id}')" class="w-full mt-4 bg-blue-900 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Prendi in Prestito</button>`;
@@ -658,12 +656,12 @@ await supabaseClient.auth.signInWithOAuth({
                 return;
             }
 
-            google.script.run.withSuccessHandler(function() {
+            window.google.script.run.withSuccessHandler(function() {
                 titleInput.value = "";
                 authorInput.value = "";
                 if(btn) btn.disabled = false;
                 closeModal();
-                initApp(); // Ricarica i dati aggiornati senza fare il refresh totale della pagina
+                initApp();
             }).withFailureHandler(function(err) {
                 console.error("Errore inserimento:", err);
                 if(btn) btn.disabled = false;
@@ -673,7 +671,7 @@ await supabaseClient.auth.signInWithOAuth({
         // Funzione per gestire l'azione di prestito (Ritiro)
         function borrowBook(bookId) {
             if(!confirm("Confermi di voler prendere in prestito questo volume?")) return;
-            google.script.run.withSuccessHandler(function() {
+            window.google.script.run.withSuccessHandler(function() {
                 initApp();
             }).withdrawBook(bookId);
         }
@@ -681,7 +679,7 @@ await supabaseClient.auth.signInWithOAuth({
         // Funzione per gestire la restituzione di un libro
         function returnBook(bookId) {
             if(!confirm("Confermi di voler restituire questo volume alla biblioteca?")) return;
-            google.script.run.withSuccessHandler(function() {
+            window.google.script.run.withSuccessHandler(function() {
                 initApp();
             }).returnBook(bookId);
         }
@@ -714,7 +712,7 @@ await supabaseClient.auth.signInWithOAuth({
                 modal.classList.add('flex');
                 setTimeout(() => container.classList.remove('scale-95', 'opacity-0'), 10);
                 
-                google.script.run.withSuccessHandler(function(profile) {
+                window.google.script.run.withSuccessHandler(function(profile) {
                     if(profile) {
                         document.getElementById('profile-name').value = profile.name || '';
                         document.getElementById('profile-surname').value = profile.surname || '';
@@ -743,8 +741,8 @@ await supabaseClient.auth.signInWithOAuth({
                 section: document.getElementById('profile-section').value.trim(),
                 year: document.getElementById('profile-year').value.trim()
             };
-            google.script.run.withSuccessHandler(function() {
-                currentUserFullName = (payload.name + " " + payload.surname).trim();
+            window.google.script.run.withSuccessHandler(function() {
+                let currentUserFullName = (payload.name + " " + payload.surname).trim();
                 if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
                 const avatar = document.getElementById('avatar');
                 if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
@@ -752,7 +750,6 @@ await supabaseClient.auth.signInWithOAuth({
             }).saveProfile(payload);
         }
     </script>
-
     <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
 </body>
 </html>
