@@ -427,7 +427,94 @@ await supabaseClient.auth.signInWithOAuth({
         };
    </script>
 
-    <script>
+<script>
+        let allBooks = [];
+        let allMovements = [];
+
+        // Questa funzione viene chiamata da initApp() non appena Supabase risponde con i dati
+        function initApp() {
+            google.script.run.withSuccessHandler(function(data) {
+                allBooks = data.books || [];
+                allMovements = data.movements || [];
+                
+                renderBooks(allBooks);
+                renderHistory(allMovements);
+
+                // Nasconde il loader con effetto dissolvenza
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.classList.add('opacity-0');
+                    setTimeout(() => loader.remove(), 500);
+                }
+            }).loadAllData();
+        }
+
+        // Genera visivamente le schede dei libri nel catalogo dinamico
+        function renderBooks(booksList) {
+            const grid = document.getElementById('books-grid');
+            if (!grid) return;
+            grid.innerHTML = "";
+
+            if (booksList.length === 0) {
+                grid.innerHTML = `<p class="text-slate-400 text-sm italic col-span-full text-center py-10">Nessun libro trovato.</p>`;
+                return;
+            }
+
+            booksList.forEach(book => {
+                const isDisponibile = book.status === 'disponibile';
+                const badgeColor = isDisponibile ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100';
+                
+                // Determina l'azione del pulsante in base allo stato del libro
+                let actionButton = "";
+                if (isDisponibile) {
+                    actionButton = `<button onclick="borrowBook('${book.id}')" class="w-full mt-4 bg-blue-900 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Prendi in Prestito</button>`;
+                } else if (book.currentHolder === currentUserEmail) {
+                    actionButton = `<button onclick="returnBook('${book.id}')" class="w-full mt-4 bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>`;
+                } else {
+                    actionButton = `<button disabled class="w-full mt-4 bg-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-wider py-3 rounded-xl border border-slate-200 cursor-not-allowed">In prestito a un collega</button>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm book-card animate-card">
+                        <div class="flex justify-between items-start gap-4 mb-4">
+                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${badgeColor}">${book.status}</span>
+                            <span class="text-[10px] text-slate-400 font-bold">${book.date}</span>
+                        </div>
+                        <h4 class="font-black text-xl text-blue-900 tracking-tight leading-tight mb-1 serif">${book.title}</h4>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wide mb-4">${book.author}</p>
+                        <div class="pt-4 border-t border-slate-50 text-[11px] text-slate-400">
+                            <span class="font-medium">Donato da:</span> <span class="font-bold text-slate-600">${book.donor}</span>
+                        </div>
+                        ${actionButton}
+                    </div>
+                `;
+            });
+        }
+
+        // Genera le righe dello storico dei movimenti
+        function renderHistory(movementsList) {
+            const body = document.getElementById('history-body');
+            if (!body) return;
+            body.innerHTML = "";
+
+            if (movementsList.length === 0) {
+                body.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Nessun movimento registrato.</td></tr>`;
+                return;
+            }
+
+            movementsList.forEach(m => {
+                body.innerHTML += `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors history-row">
+                        <td class="p-6 text-slate-500 font-medium">${m.timestamp}</td>
+                        <td class="p-6 font-bold text-slate-800">${m.utente} <span class="block text-[10px] font-medium text-slate-400">${m.user_email}</span></td>
+                        <td class="p-6"><span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide bg-slate-100 text-slate-700">${m.azione}</span></td>
+                        <td class="p-6 text-slate-600 font-medium italic">${m.titolo}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Gestione dei Menu/Viste (Catalogo, Miei Prestiti, Movimenti)
         function switchView(view) {
             const catalogBtn = document.getElementById('btn-catalog');
             const myBooksBtn = document.getElementById('btn-my-books');
@@ -437,7 +524,6 @@ await supabaseClient.auth.signInWithOAuth({
             const searchBar = document.getElementById('header-search');
             const title = document.getElementById('view-title');
 
-            // Reset classi pulsanti
             [catalogBtn, myBooksBtn, historyBtn].forEach(b => {
                 if(b) b.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-blue-900";
             });
@@ -448,31 +534,104 @@ await supabaseClient.auth.signInWithOAuth({
                 if(history) history.classList.add('hidden');
                 if(searchBar) searchBar.classList.remove('hidden');
                 if(title) title.innerText = "Catalogo Libri";
+                renderBooks(allBooks);
             } else if (view === 'my-books') {
                 if(myBooksBtn) myBooksBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
                 if(grid) grid.classList.remove('hidden');
                 if(history) history.classList.add('hidden');
                 if(searchBar) searchBar.classList.add('hidden');
                 if(title) title.innerText = "I Miei Prestiti";
+                const myBooks = allBooks.filter(b => b.currentHolder === currentUserEmail);
+                renderBooks(myBooks);
             } else if (view === 'history') {
                 if(historyBtn) historyBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
                 if(grid) grid.classList.add('hidden');
                 if(history) history.classList.remove('hidden');
                 if(searchBar) searchBar.classList.add('hidden');
                 if(title) title.innerText = "Movimenti Registro";
+                renderHistory(allMovements);
             }
         }
 
+        // Funzione per filtrare i libri in tempo reale nella barra di ricerca
+        function onSearchInput() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const filtered = allBooks.filter(b => 
+                b.title.toLowerCase().includes(query) || 
+                b.author.toLowerCase().includes(query) || 
+                b.donor.toLowerCase().includes(query)
+            );
+            renderBooks(filtered);
+        }
+
+        // Funzione per filtrare i movimenti nel registro storico
+        function onHistorySearchInput() {
+            const query = document.getElementById('history-search').value.toLowerCase().trim();
+            const filtered = allMovements.filter(m => 
+                m.titolo.toLowerCase().includes(query) || 
+                m.utente.toLowerCase().includes(query) ||
+                m.azione.toLowerCase().includes(query)
+            );
+            renderHistory(filtered);
+        }
+
+        // Logica per aggiungere/donare un nuovo libro
+        function submitBook() {
+            const btn = document.getElementById('submit-btn');
+            const titleInput = document.getElementById('book-title');
+            const authorInput = document.getElementById('book-author');
+
+            if(!titleInput || !authorInput) return;
+            if(btn) btn.disabled = true;
+
+            const payload = {
+                title: titleInput.value.trim(),
+                authors: authorInput.value.trim(),
+                subject: ""
+            };
+
+            if (!payload.title || !payload.authors) {
+                alert("Per favore, compila sia il titolo che l'autore!");
+                if(btn) btn.disabled = false;
+                return;
+            }
+
+            google.script.run.withSuccessHandler(function() {
+                titleInput.value = "";
+                authorInput.value = "";
+                if(btn) btn.disabled = false;
+                closeModal();
+                initApp(); // Ricarica i dati aggiornati senza fare il refresh totale della pagina
+            }).withFailureHandler(function(err) {
+                console.error("Errore inserimento:", err);
+                if(btn) btn.disabled = false;
+            }).addBook(payload);
+        }
+
+        // Funzione per gestire l'azione di prestito (Ritiro)
+        function borrowBook(bookId) {
+            if(!confirm("Confermi di voler prendere in prestito questo volume?")) return;
+            google.script.run.withSuccessHandler(function() {
+                initApp();
+            }).withdrawBook(bookId);
+        }
+
+        // Funzione per gestire la restituzione di un libro
+        function returnBook(bookId) {
+            if(!confirm("Confermi di voler restituire questo volume alla biblioteca?")) return;
+            google.script.run.withSuccessHandler(function() {
+                initApp();
+            }).returnBook(bookId);
+        }
+
+        // Gestione finestre Modali
         function openModal(mode) {
             const modal = document.getElementById('modal');
             const container = document.getElementById('modal-container');
             if(modal && container) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
-                setTimeout(() => {
-                    container.classList.remove('scale-95', 'opacity-0');
-                    container.classList.add('scale-100', 'opacity-100');
-                }, 10);
+                setTimeout(() => container.classList.remove('scale-95', 'opacity-0'), 10);
             }
         }
 
@@ -480,12 +639,8 @@ await supabaseClient.auth.signInWithOAuth({
             const modal = document.getElementById('modal');
             const container = document.getElementById('modal-container');
             if(modal && container) {
-                container.classList.remove('scale-100', 'opacity-100');
                 container.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    modal.classList.remove('flex');
-                    modal.classList.add('hidden');
-                }, 180);
+                setTimeout(() => { modal.classList.remove('flex'); modal.classList.add('hidden'); }, 180);
             }
         }
 
@@ -495,10 +650,8 @@ await supabaseClient.auth.signInWithOAuth({
             if(modal && container) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
-                setTimeout(() => {
-                    container.classList.remove('scale-95', 'opacity-0');
-                    container.classList.add('scale-100', 'opacity-100');
-                }, 10);
+                setTimeout(() => container.classList.remove('scale-95', 'opacity-0'), 10);
+                
                 google.script.run.withSuccessHandler(function(profile) {
                     if(profile) {
                         document.getElementById('profile-name').value = profile.name || '';
@@ -515,34 +668,27 @@ await supabaseClient.auth.signInWithOAuth({
             const modal = document.getElementById('profile-modal');
             const container = document.getElementById('profile-container');
             if(modal && container) {
-                container.classList.remove('scale-100', 'opacity-100');
                 container.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    modal.classList.remove('flex');
-                    modal.classList.add('hidden');
-                }, 180);
+                setTimeout(() => { modal.classList.remove('flex'); modal.classList.add('hidden'); }, 180);
             }
         }
 
         function saveProfile() {
             const payload = {
-                name: document.getElementById('profile-name').value,
-                surname: document.getElementById('profile-surname').value,
-                class: document.getElementById('profile-class').value,
-                section: document.getElementById('profile-section').value,
-                year: document.getElementById('profile-year').value
+                name: document.getElementById('profile-name').value.trim(),
+                surname: document.getElementById('profile-surname').value.trim(),
+                class: document.getElementById('profile-class').value.trim(),
+                section: document.getElementById('profile-section').value.trim(),
+                year: document.getElementById('profile-year').value.trim()
             };
             google.script.run.withSuccessHandler(function() {
-                document.getElementById('user-display').innerText = (payload.name + " " + payload.surname).toUpperCase();
+                currentUserFullName = (payload.name + " " + payload.surname).trim();
+                if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
                 const avatar = document.getElementById('avatar');
                 if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
                 closeProfileModal();
             }).saveProfile(payload);
         }
-
-        function onSearchInput() { /* Logica di ricerca locale se necessaria */ }
-        function onHistorySearchInput() { /* Logica di ricerca storico se necessaria */ }
-        function submitBook() { /* Logica di invio libro */ }
     </script>
 
     <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
