@@ -250,10 +250,10 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Utilizza supabaseClient impostato in cima
-                const { data: { session } } = await supabaseClient.auth.getSession();
+                const { data: { session } } = await supabase.auth.getSession();
                 
                 if (!session) {
-await supabaseClient.auth.signInWithOAuth({
+await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { 
         redirectTo: window.location.origin + window.location.pathname 
