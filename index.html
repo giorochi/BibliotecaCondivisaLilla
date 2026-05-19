@@ -342,21 +342,41 @@ await supabaseClient.auth.signInWithOAuth({
                     },
 
                     addBook: async function(payload) {
-                        try {
-                            const time = new Date().toLocaleString('it-IT');
-                            const { data: newBook, error } = await supabaseClient.from('books').insert([{
-                                title: payload.title, authors: payload.authors, subject: payload.subject,
-                                owner_email: currentUserEmail, owner_name: currentUserName, status: 'Disponibile', timestamp: time
-                            }]).select().single();
-                            if (error) throw error;
-                            
-                            await supabaseClient.from('movements').insert([{
-                                book_id: newBook.id, book_title: payload.title, type: 'DONAZIONE',
-                                operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
-                            }]);
-                            if (this.successCallback) this.successCallback();
-                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
-                    },
+    try {
+        // Recupera l'utente attualmente loggato per assegnargli la donazione
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        const userEmail = user ? user.email : 'Anonimo';
+
+        const { data, error } = await supabaseClient
+            .from('books')
+            .insert([
+                { 
+                    title: payload.title, 
+                    authors: payload.authors, 
+                    status: 'disponibile',
+                    donor: userEmail, // Associa il donatore in automatico
+                    currentHolder: null
+                }
+            ]);
+
+        if (error) throw error;
+
+        // Se hai anche una tabella movimenti per tracciare la donazione, aggiungila qui
+        await supabaseClient.from('movements').insert([
+            {
+                utente: userEmail.split('@')[0],
+                user_email: userEmail,
+                azione: 'DONAZIONE',
+                titolo: payload.title,
+                timestamp: new Date().toLocaleString('it-IT')
+            }
+        ]);
+
+        if (this.successCallback) this.successCallback(data);
+    } catch(e) { 
+        if (this.failureCallback) this.failureCallback(e); 
+    }
+}
 
                     withdrawBook: async function(bookId) {
                         try {
