@@ -13,7 +13,7 @@
       
       // NOTA: Usiamo un nome univoco (supabaseClient) per evitare che JavaScript vada in confusione 
       // e sovrascriva l'oggetto nativo 'supabase' caricato dalla libreria CDN.
-     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);;
+     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -250,10 +250,10 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Utilizza supabaseClient impostato in cima
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
-await supabase.auth.signInWithOAuth({
+await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: { 
         redirectTo: window.location.origin + window.location.pathname 
