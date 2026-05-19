@@ -321,11 +321,24 @@ await supabaseClient.auth.signInWithOAuth({
                                 id: String(b.id),
                                 title: String(b.title || ""),
                                 author: String(b.authors || ""),
-                                donor: String(b.owner_name || b.owner_email || ""),
+                                donor: String(b.owner_name || b.owner_email || "Anonimo"),
                                 date: String(b.timestamp || "").split(" ")[0] || "",
                                 status: String(b.status || "disponibile").toLowerCase(),
-                                currentHolder: String(b.borrower_name || b.borrower_email || "")
+                                currentHolder: String(b.borrower_email || "") // Usato per verificare se l'utente loggato ha il libro
                             }));
+
+                            const mappedMovements = (movements || []).map(m => ({
+                                timestamp: String(m.timestamp || ""),
+                                utente: String(m.operator_name || m.operator_email || "Utente"),
+                                user_email: String(m.operator_email || ""),
+                                azione: String(m.type || "-"),
+                                titolo: String(m.book_title || "Libro"),
+                                book_id: String(m.book_id || "")
+                            }));
+
+                            if (this.successCallback) this.successCallback({ books: mappedBooks, movements: mappedMovements });
+                        } catch(e) { if (this.failureCallback) this.failureCallback(e); }
+                    },
 
                             const mappedMovements = (movements || []).map(m => ({
                                 timestamp: String(m.timestamp || ""),
@@ -342,51 +355,67 @@ await supabaseClient.auth.signInWithOAuth({
                     },
 
                     addBook: async function(payload) {
-    try {
-        // Recupera l'utente attualmente loggato per assegnargli la donazione
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        const userEmail = user ? user.email : 'Anonimo';
+                        try {
+                            const time = new Date().toLocaleString('it-IT');
+                            
+                            // Registrazione del libro usando i campi del tuo database
+                            const { data, error } = await supabaseClient
+                                .from('books')
+                                .insert([
+                                    { 
+                                        title: payload.title, 
+                                        authors: payload.authors, 
+                                        status: 'disponibile',
+                                        owner_email: currentUserEmail,
+                                        owner_name: currentUserName || currentUserEmail.split('@')[0],
+                                        borrower_email: null,
+                                        borrower_name: null,
+                                        subject: "",
+                                        timestamp: time
+                                    }
+                                ]);
 
-        const { data, error } = await supabaseClient
-            .from('books')
-            .insert([
-                { 
-                    title: payload.title, 
-                    authors: payload.authors, 
-                    status: 'disponibile',
-                    donor: userEmail, // Associa il donatore in automatico
-                    currentHolder: null
-                }
-            ]);
+                            if (error) throw error;
 
-        if (error) throw error;
+                            // Registrazione del movimento nello storico
+                            await supabaseClient.from('movements').insert([
+                                {
+                                    book_id: null, // Sarà generato seriale o lasciato null per la donazione
+                                    book_title: payload.title,
+                                    type: 'DONAZIONE',
+                                    operator_email: currentUserEmail,
+                                    operator_name: currentUserName || currentUserEmail.split('@')[0],
+                                    timestamp: time
+                                }
+                            ]);
 
-        // Se hai anche una tabella movimenti per tracciare la donazione, aggiungila qui
-        await supabaseClient.from('movements').insert([
-            {
-                utente: userEmail.split('@')[0],
-                user_email: userEmail,
-                azione: 'DONAZIONE',
-                titolo: payload.title,
-                timestamp: new Date().toLocaleString('it-IT')
-            }
-        ]);
-
-        if (this.successCallback) this.successCallback(data);
-    } catch(e) { 
-        if (this.failureCallback) this.failureCallback(e); 
-    }
-},
+                            if (this.successCallback) this.successCallback(data);
+                        } catch(e) { 
+                            if (this.failureCallback) this.failureCallback(e); 
+                        }
+                    },
                     
                     withdrawBook: async function(bookId) {
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
-                            await supabaseClient.from('books').update({ status: 'Ritirato', borrower_email: currentUserEmail, borrower_name: currentUserName }).eq('id', bookId);
+                            
+                            // Aggiorna lo stato usando i campi corretti del tuo DB
+                            await supabaseClient.from('books').update({ 
+                                status: 'Ritirato', 
+                                borrower_email: currentUserEmail, 
+                                borrower_name: currentUserName || currentUserEmail.split('@')[0] 
+                            }).eq('id', bookId);
+
                             await supabaseClient.from('movements').insert([{
-                                book_id: bookId, book_title: book.title, type: 'RITIRO',
-                                operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
+                                book_id: bookId, 
+                                book_title: book.title, 
+                                type: 'RITIRO',
+                                operator_email: currentUserEmail, 
+                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                timestamp: time
                             }]);
+                            
                             if (this.successCallback) this.successCallback();
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
@@ -399,14 +428,22 @@ await supabaseClient.auth.signInWithOAuth({
                             await supabaseClient.from('books').update({ status: 'scambiato' }).eq('id', bookId);
                             
                             const { data: newBook } = await supabaseClient.from('books').insert([{
-                                title: newTitle, authors: newAuthor, status: 'Disponibile',
-                                owner_email: currentUserEmail, owner_name: currentUserName, timestamp: time
+                                title: newTitle, 
+                                authors: newAuthor, 
+                                status: 'disponibile',
+                                owner_email: currentUserEmail, 
+                                owner_name: currentUserName || currentUserEmail.split('@')[0], 
+                                timestamp: time
                             }]).select().single();
 
                             const detail = `Ritirato: ${book.title} → Donato: ${newTitle}`;
                             await supabaseClient.from('movements').insert([{
-                                book_id: newBook.id, book_title: detail, type: 'SCAMBIO',
-                                operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
+                                book_id: newBook.id, 
+                                book_title: detail, 
+                                type: 'SCAMBIO',
+                                operator_email: currentUserEmail, 
+                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                timestamp: time
                             }]);
                             if (this.successCallback) this.successCallback();
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
@@ -416,15 +453,25 @@ await supabaseClient.auth.signInWithOAuth({
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             const { data: book } = await supabaseClient.from('books').select('*').eq('id', bookId).single();
-                            await supabaseClient.from('books').update({ status: 'Disponibile', borrower_email: null, borrower_name: null }).eq('id', bookId);
+                            
+                            // Ripristina lo stato a disponibile e svuota i campi del borrower
+                            await supabaseClient.from('books').update({ 
+                                status: 'disponibile', 
+                                borrower_email: null, 
+                                borrower_name: null 
+                            }).eq('id', bookId);
+
                             await supabaseClient.from('movements').insert([{
-                                book_id: bookId, book_title: book.title, type: 'RESTITUZIONE',
-                                operator_email: currentUserEmail, operator_name: currentUserName, timestamp: time
+                                book_id: bookId, 
+                                book_title: book.title, 
+                                type: 'RESTITUZIONE',
+                                operator_email: currentUserEmail, 
+                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                timestamp: time
                             }]);
                             if (this.successCallback) this.successCallback();
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     },
-
                     getProfile: async function() {
     try {
         const { data: profile } = await supabaseClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
