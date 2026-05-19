@@ -419,7 +419,126 @@ await supabaseClient.auth.signInWithOAuth({
                 }
             }
         };
+   </script>
+
+    <script>
+        function switchView(view) {
+            const catalogBtn = document.getElementById('btn-catalog');
+            const myBooksBtn = document.getElementById('btn-my-books');
+            const historyBtn = document.getElementById('btn-history');
+            const grid = document.getElementById('books-grid');
+            const history = document.getElementById('history-container');
+            const searchBar = document.getElementById('header-search');
+            const title = document.getElementById('view-title');
+
+            // Reset classi pulsanti
+            [catalogBtn, myBooksBtn, historyBtn].forEach(b => {
+                if(b) b.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-blue-900";
+            });
+
+            if (view === 'catalog') {
+                if(catalogBtn) catalogBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
+                if(grid) grid.classList.remove('hidden');
+                if(history) history.classList.add('hidden');
+                if(searchBar) searchBar.classList.remove('hidden');
+                if(title) title.innerText = "Catalogo Libri";
+            } else if (view === 'my-books') {
+                if(myBooksBtn) myBooksBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
+                if(grid) grid.classList.remove('hidden');
+                if(history) history.classList.add('hidden');
+                if(searchBar) searchBar.classList.add('hidden');
+                if(title) title.innerText = "I Miei Prestiti";
+            } else if (view === 'history') {
+                if(historyBtn) historyBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
+                if(grid) grid.classList.add('hidden');
+                if(history) history.classList.remove('hidden');
+                if(searchBar) searchBar.classList.add('hidden');
+                if(title) title.innerText = "Movimenti Registro";
+            }
+        }
+
+        function openModal(mode) {
+            const modal = document.getElementById('modal');
+            const container = document.getElementById('modal-container');
+            if(modal && container) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                    container.classList.remove('scale-95', 'opacity-0');
+                    container.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const container = document.getElementById('modal-container');
+            if(modal && container) {
+                container.classList.remove('scale-100', 'opacity-100');
+                container.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                }, 180);
+            }
+        }
+
+        function openProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            const container = document.getElementById('profile-container');
+            if(modal && container) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                    container.classList.remove('scale-95', 'opacity-0');
+                    container.classList.add('scale-100', 'opacity-100');
+                }, 10);
+                google.script.run.withSuccessHandler(function(profile) {
+                    if(profile) {
+                        document.getElementById('profile-name').value = profile.name || '';
+                        document.getElementById('profile-surname').value = profile.surname || '';
+                        document.getElementById('profile-class').value = profile.class || '';
+                        document.getElementById('profile-section').value = profile.section || '';
+                        document.getElementById('profile-year').value = profile.year || '';
+                    }
+                }).getProfile();
+            }
+        }
+
+        function closeProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            const container = document.getElementById('profile-container');
+            if(modal && container) {
+                container.classList.remove('scale-100', 'opacity-100');
+                container.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                }, 180);
+            }
+        }
+
+        function saveProfile() {
+            const payload = {
+                name: document.getElementById('profile-name').value,
+                surname: document.getElementById('profile-surname').value,
+                class: document.getElementById('profile-class').value,
+                section: document.getElementById('profile-section').value,
+                year: document.getElementById('profile-year').value
+            };
+            google.script.run.withSuccessHandler(function() {
+                document.getElementById('user-display').innerText = (payload.name + " " + payload.surname).toUpperCase();
+                const avatar = document.getElementById('avatar');
+                if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
+                closeProfileModal();
+            }).saveProfile(payload);
+        }
+
+        function onSearchInput() { /* Logica di ricerca locale se necessaria */ }
+        function onHistorySearchInput() { /* Logica di ricerca storico se necessaria */ }
+        function submitBook() { /* Logica di invio libro */ }
     </script>
-    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
+
+    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
 </body>
 </html>
