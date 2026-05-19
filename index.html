@@ -395,7 +395,7 @@ await supabaseClient.auth.signInWithOAuth({
         const { data: profile } = await supabaseClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
         if (this.successCallback) this.successCallback(profile || {});
     } catch(e) { if (this.failureCallback) this.failureCallback(e); }
-}
+},
 
                     saveProfile: async function(payload) {
                         try {
