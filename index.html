@@ -296,7 +296,7 @@ await supabaseClient.auth.signInWithOAuth({
             }).loadAllData();
         }
 
-        // TRUCCO DI COMPATIBILITÀ: Dirotta google.script.run verso supabaseClient
+       // TRUCCO DI COMPATIBILITÀ: Dirotta google.script.run verso supabaseClient
         window.google = {
             script: {
                 run: {
@@ -367,6 +367,7 @@ await supabaseClient.auth.signInWithOAuth({
 
                             if (error) throw error;
 
+                            // Correggiamo le colonne inviate a movements combaciando con lo schema DB
                             await localClient.from('movements').insert([
                                 {
                                     book_id: null,
@@ -395,7 +396,7 @@ await supabaseClient.auth.signInWithOAuth({
                             }).eq('id', bookId);
 
                             await localClient.from('movements').insert([{
-                                book_id: bookId, 
+                                book_id: parseInt(bookId), 
                                 book_title: book.title, 
                                 type: 'RITIRO',
                                 operator_email: currentUserEmail, 
@@ -449,7 +450,7 @@ await supabaseClient.auth.signInWithOAuth({
                             }).eq('id', bookId);
 
                             await localClient.from('movements').insert([{
-                                book_id: bookId, 
+                                book_id: parseInt(bookId), 
                                 book_title: book.title, 
                                 type: 'RESTITUZIONE',
                                 operator_email: currentUserEmail, 
