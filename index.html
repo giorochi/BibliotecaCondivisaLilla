@@ -523,18 +523,18 @@ await supabaseClient.auth.signInWithOAuth({
             }
         };
 
-// VARIABILI GLOBALI PER I DATI
+// VARIABILI GLOBALI PER I DATI (Lasciale così come sono)
         let allBooks = [];
         let allMovements = [];
-        let currentExchangeBookId = null; // Traccia quale libro si sta scambiando
+        let currentExchangeBookId = null; 
 
-       // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT (CON CONTROLLO PROFILO OBBLIGATORIO)
+       // QUESTA È L'UNICA FUNZIONE initApp() CHE DEVE RIMANERE
         function initApp() {
             window.google.script.run.withSuccessHandler(function(data) {
                 allBooks = data.books || [];
                 allMovements = data.movements || [];
                 
-                // Forza il caricamento iniziale mostrando SOLO i libri realmente disponibili
+                // Forza il caricamento iniziale mostrando i libri disponibili
                 const availableBooks = allBooks.filter(b => b.status === 'disponibile');
                 renderBooks(availableBooks);
                 renderHistory(allMovements);
@@ -546,16 +546,19 @@ await supabaseClient.auth.signInWithOAuth({
                     setTimeout(() => loader.remove(), 500);
                 }
 
-                // CONTROLLO PRIMO ACCESSO: Verifica se il profilo esiste ed è completo
+                // CONTROLLO PROFILO: Verifica se il profilo esiste ed è completo
                 window.google.script.run.withSuccessHandler(function(profile) {
                     if (!profile || !profile.name || !profile.surname || !profile.class) {
                         openProfileModal(true); 
                     } else {
-                        // MODIFICA QUI: Mostra Nome Cognome (Classe) anche al riavvio dell'app
                         let currentUserFullName = `${profile.name} ${profile.surname} (${profile.class}${profile.section || ''})`;
-                        if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+                        if (document.getElementById('user-display')) {
+                            document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+                        }
                         const avatar = document.getElementById('avatar');
-                        if(avatar && profile.name) avatar.innerText = profile.name.charAt(0).toUpperCase();
+                        if (avatar && profile.name) {
+                            avatar.innerText = profile.name.charAt(0).toUpperCase();
+                        }
                     }
                 }).getProfile();
 
