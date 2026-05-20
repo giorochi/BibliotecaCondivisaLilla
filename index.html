@@ -842,7 +842,6 @@ await supabaseClient.auth.signInWithOAuth({
                 alert("Profilo registrato con successo! Ora puoi usare l'app.");
                 initApp(); 
             }).saveProfile(payload);
-        }
             window.google.script.run.withSuccessHandler(function() {
                 let currentUserFullName = (payload.name + " " + payload.surname).trim();
                 if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
