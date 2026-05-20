@@ -757,8 +757,9 @@ await supabaseClient.auth.signInWithOAuth({
                 closeProfileModal();
             }).saveProfile(payload);
         }
-            // Funzione di supporto per lo Scambio
-       function promptExchange(bookId) {
+
+        // FUNZIONE GRAFICA DI SUPPORTO PER LO SCAMBIO (INSERITA E CHIUSA CORRETTAMENTE)
+        function promptExchange(bookId) {
             const newTitle = prompt("Inserisci il TITOLO del nuovo libro:");
             if (!newTitle) return;
             const newAuthor = prompt("Inserisci l'AUTORE del nuovo libro:");
@@ -770,6 +771,7 @@ await supabaseClient.auth.signInWithOAuth({
             }).exchangeBook(bookId, newTitle.trim(), newAuthor.trim());
         }
     </script>
-    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
+
+    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
 </body>
 </html>
