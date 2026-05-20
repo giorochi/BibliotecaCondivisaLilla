@@ -494,13 +494,15 @@ await supabaseClient.auth.signInWithOAuth({
         let allBooks = [];
         let allMovements = [];
 
-        // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT
+        // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT (CORRETTA)
         function initApp() {
             window.google.script.run.withSuccessHandler(function(data) {
                 allBooks = data.books || [];
                 allMovements = data.movements || [];
                 
-                renderBooks(allBooks);
+                // BUG FIX: All'avvio mostra nel catalogo SOLO i libri disponibili
+                const availableBooks = allBooks.filter(b => b.status === 'disponibile');
+                renderBooks(availableBooks);
                 renderHistory(allMovements);
 
                 // Nasconde il loader con effetto dissolvenza
@@ -512,24 +514,26 @@ await supabaseClient.auth.signInWithOAuth({
             }).loadAllData();
         }
 
-       // Genera visivamente le schede dei libri nel catalogo dinamico
+       // Genera visivamente le schede dei libri nel catalogo dinamico (CORRETTA)
         function renderBooks(booksList) {
             const grid = document.getElementById('books-grid');
             if (!grid) return;
             grid.innerHTML = "";
 
-            if (booksList.length === 0) {
+            // Filtra via i libri scambiati a prescindere, non devono mai apparire in nessuna vista
+            const validBooks = booksList.filter(b => b.status !== 'scambiato');
+
+            if (validBooks.length === 0) {
                 grid.innerHTML = `<p class="text-slate-400 text-sm italic col-span-full text-center py-10">Nessun libro trovato.</p>`;
                 return;
             }
 
-            booksList.forEach(book => {
+            validBooks.forEach(book => {
                 const isDisponibile = book.status === 'disponibile';
                 const badgeColor = isDisponibile ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100';
                 
                 let actionButton = "";
                 if (isDisponibile) {
-                    // PUNTO 2: Lo scambio è disponibile per i libri NON PRESI. Mostriamo la doppia scelta grafica.
                     actionButton = `
                         <div class="flex flex-col gap-2 mt-4">
                             <button onclick="borrowBook('${book.id}')" class="w-full bg-blue-900 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Prendi in Prestito</button>
@@ -558,7 +562,6 @@ await supabaseClient.auth.signInWithOAuth({
                 `;
             });
         }
-
         // Genera le righe dello storico dei movimenti
         function renderHistory(movementsList) {
             const body = document.getElementById('history-body');
