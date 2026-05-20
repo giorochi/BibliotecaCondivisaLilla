@@ -495,7 +495,7 @@ await supabaseClient.auth.signInWithOAuth({
         let allMovements = [];
         let currentExchangeBookId = null; // Traccia quale libro si sta scambiando
 
-        // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT
+       // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT (CON CONTROLLO PROFILO OBBLIGATORIO)
         function initApp() {
             window.google.script.run.withSuccessHandler(function(data) {
                 allBooks = data.books || [];
@@ -512,6 +512,21 @@ await supabaseClient.auth.signInWithOAuth({
                     loader.classList.add('opacity-0');
                     setTimeout(() => loader.remove(), 500);
                 }
+
+                // CONTROLLO PRIMO ACCESSO: Verifica se il profilo esiste ed è completo
+                window.google.script.run.withSuccessHandler(function(profile) {
+                    if (!profile || !profile.name || !profile.surname || !profile.class) {
+                        // Se il profilo manca o è incompleto, forza l'apertura del modale in modalità bloccata
+                        openProfileModal(true); 
+                    } else {
+                        // Se è completo, imposta il nome nell'header graficamente
+                        let currentUserFullName = (profile.name + " " + profile.surname).trim();
+                        if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+                        const avatar = document.getElementById('avatar');
+                        if(avatar && profile.name) avatar.innerText = profile.name.charAt(0).toUpperCase();
+                    }
+                }).getProfile();
+
             }).loadAllData();
         }
 
@@ -724,9 +739,26 @@ await supabaseClient.auth.signInWithOAuth({
             }
         }
 
-        function openProfileModal() {
+        // Apre il modale del profilo (con blocco se isForced è vero)
+        function openProfileModal(isForced = false) {
             const modal = document.getElementById('profile-modal');
             const container = document.getElementById('profile-container');
+            
+            // Cerca il bottone di chiusura (la X o il tasto annulla) all'interno del modale
+            // NOTA: Se hai un'icona di chiusura in alto a destra con un id tipo 'close-profile-btn', usiamo quello.
+            // Altrimenti, cerchiamo il primo bottone di chiusura generico.
+            const closeBtn = document.getElementById('close-profile-btn') || modal.querySelector('button[onclick="closeProfileModal()"]');
+
+            if (isForced) {
+                // Se è forzato, nascondiamo i pulsanti per chiudere il popup
+                if (closeBtn) closeBtn.classList.add('hidden');
+                // Impedisce la chiusura accidentale cliccando sullo sfondo scuro
+                modal.onclick = function(e) { if(e.target === modal) return false; };
+            } else {
+                if (closeBtn) closeBtn.classList.remove('hidden');
+                modal.onclick = function(e) { if(e.target === modal) closeProfileModal(); };
+            }
+
             if(modal && container) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -754,19 +786,36 @@ await supabaseClient.auth.signInWithOAuth({
         }
 
         function saveProfile() {
+            const nameVal = document.getElementById('profile-name').value.trim();
+            const surnameVal = document.getElementById('profile-surname').value.trim();
+            const classVal = document.getElementById('profile-class').value.trim();
+            const sectionVal = document.getElementById('profile-section').value.trim();
+            const yearVal = document.getElementById('profile-year').value.trim();
+
+            // Validazione: blocca il salvataggio se i campi fondamentali sono vuoti
+            if (!nameVal || !surnameVal || !classVal || !yearVal) {
+                alert("Tutti i campi (Nome, Cognome, Classe e Anno Scolastico) sono obbligatori per registrarsi!");
+                return;
+            }
+
             const payload = {
-                name: document.getElementById('profile-name').value.trim(),
-                surname: document.getElementById('profile-surname').value.trim(),
-                class: document.getElementById('profile-class').value.trim(),
-                section: document.getElementById('profile-section').value.trim(),
-                year: document.getElementById('profile-year').value.trim()
+                name: nameVal,
+                surname: surnameVal,
+                class: classVal,
+                section: sectionVal,
+                year: yearVal
             };
+
             window.google.script.run.withSuccessHandler(function() {
                 let currentUserFullName = (payload.name + " " + payload.surname).trim();
                 if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
                 const avatar = document.getElementById('avatar');
                 if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
+                
+                // Una volta salvato con successo, ripristiniamo la normale interattività dell'app
                 closeProfileModal();
+                alert("Profilo registrato con successo! Ora puoi usare l'app.");
+                initApp(); // Ricarica per aggiornare l'interfaccia globale
             }).saveProfile(payload);
         }
 
