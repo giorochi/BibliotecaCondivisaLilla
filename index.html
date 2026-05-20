@@ -512,7 +512,7 @@ await supabaseClient.auth.signInWithOAuth({
             }).loadAllData();
         }
 
-        // Genera visivamente le schede dei libri nel catalogo dinamico
+        // Genera visivamente le schede dei libri nel catalogo dinamico (CORRETTO)
         function renderBooks(booksList) {
             const grid = document.getElementById('books-grid');
             if (!grid) return;
@@ -521,13 +521,7 @@ await supabaseClient.auth.signInWithOAuth({
             if (booksList.length === 0) {
                 grid.innerHTML = `<p class="text-slate-400 text-sm italic col-span-full text-center py-10">Nessun libro trovato.</p>`;
                 return;
-            } else if (book.currentHolder === currentUserEmail) {
-                    actionButton = `
-                        <div class="flex flex-col gap-2 mt-4">
-                            <button onclick="returnBook('${book.id}')" class="w-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>
-                            <button onclick="promptExchange('${book.id}')" class="w-full bg-amber-600 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Scambia Libro</button>
-                        </div>
-                    `;
+            }
 
             booksList.forEach(book => {
                 const isDisponibile = book.status === 'disponibile';
@@ -537,7 +531,13 @@ await supabaseClient.auth.signInWithOAuth({
                 if (isDisponibile) {
                     actionButton = `<button onclick="borrowBook('${book.id}')" class="w-full mt-4 bg-blue-900 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Prendi in Prestito</button>`;
                 } else if (book.currentHolder === currentUserEmail) {
-                    actionButton = `<button onclick="returnBook('${book.id}')" class="w-full mt-4 bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>`;
+                    // QUI VIENE INSERITO CORRETTAMENTE IL DOPPIO PULSANTE SE IL LIBRO CE L'HA L'UTENTE LOGGATO
+                    actionButton = `
+                        <div class="flex flex-col gap-2 mt-4">
+                            <button onclick="returnBook('${book.id}')" class="w-full bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>
+                            <button onclick="promptExchange('${book.id}')" class="w-full bg-amber-600 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Scambia Libro</button>
+                        </div>
+                    `;
                 } else {
                     actionButton = `<button disabled class="w-full mt-4 bg-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-wider py-3 rounded-xl border border-slate-200 cursor-not-allowed">In prestito a un collega</button>`;
                 }
