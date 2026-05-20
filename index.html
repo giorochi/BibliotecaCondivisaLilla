@@ -832,26 +832,22 @@ await supabaseClient.auth.signInWithOAuth({
             const payload = { name: nameVal, surname: surnameVal, class: classVal, section: sectionVal, year: yearVal };
 
             window.google.script.run.withSuccessHandler(function() {
-                // Mostra Nome Cognome (Classe) nell'interfaccia header dell'applicazione
+                // Aggiorna l'interfaccia con Nome Cognome (ClasseSezione)
                 let currentUserFullName = `${payload.name} ${payload.surname} (${payload.class}${payload.section || ''})`;
-                if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
-                const avatar = document.getElementById('avatar');
-                if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
+                if (document.getElementById('user-display')) {
+                    document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+                }
                 
+                // Aggiorna la lettera dell'avatar
+                const avatar = document.getElementById('avatar');
+                if (avatar && payload.name) {
+                    avatar.innerText = payload.name.charAt(0).toUpperCase();
+                }
+                
+                // Chiude il popup e rinfresca i dati dell'applicazione
                 closeProfileModal();
                 alert("Profilo registrato con successo! Ora puoi usare l'app.");
                 initApp(); 
-            }).saveProfile(payload);
-            window.google.script.run.withSuccessHandler(function() {
-                let currentUserFullName = (payload.name + " " + payload.surname).trim();
-                if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
-                const avatar = document.getElementById('avatar');
-                if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
-                
-                // Una volta salvato con successo, ripristiniamo la normale interattività dell'app
-                closeProfileModal();
-                alert("Profilo registrato con successo! Ora puoi usare l'app.");
-                initApp(); // Ricarica per aggiornare l'interfaccia globale
             }).saveProfile(payload);
         }
 
