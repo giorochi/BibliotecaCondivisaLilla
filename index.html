@@ -832,7 +832,7 @@ await supabaseClient.auth.signInWithOAuth({
             const payload = { name: nameVal, surname: surnameVal, class: classVal, section: sectionVal, year: yearVal };
 
             window.google.script.run.withSuccessHandler(function() {
-                // MODIFICA QUI: Mostra Nome Cognome (Classe) nell'interfaccia
+                // Mostra Nome Cognome (Classe) nell'interfaccia header dell'applicazione
                 let currentUserFullName = `${payload.name} ${payload.surname} (${payload.class}${payload.section || ''})`;
                 if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
                 const avatar = document.getElementById('avatar');
