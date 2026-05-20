@@ -296,7 +296,7 @@ await supabaseClient.auth.signInWithOAuth({
             }).loadAllData();
         }
 
-       // TRUCCO DI COMPATIBILITÀ DIROTTA VERSO SUPABASE CLIENT
+       // TRUCCO DI COMPATIBILITÀ DIROTTA VERSO SUPABASE CLIENT (VERSIONE PROFILI ESTESI)
         window.google = {
             script: {
                 run: {
@@ -314,15 +314,32 @@ await supabaseClient.auth.signInWithOAuth({
                     loadAllData: async function() {
                         try {
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            
+                            // Scarichiamo libri, movimenti e tutti i profili registrati per l'associazione
                             const { data: books } = await localClient.from('books').select('*').order('timestamp', { ascending: false });
                             const { data: movements } = await localClient.from('movements').select('*').order('timestamp', { ascending: false });
+                            const { data: profiles } = await localClient.from('profiles').select('*');
                             
+                            // Creiamo una mappa rapida per cercare i profili tramite l'email
+                            const profileMap = {};
+                            (profiles || []).forEach(p => {
+                                if (p.email) {
+                                    profileMap[p.email.toLowerCase()] = `${p.name || ''} ${p.surname || ''} (${p.class || ''}${p.section || ''})`;
+                                }
+                            });
+
                             const mappedBooks = (books || []).map(b => {
+                                const ownerEmailKey = String(b.owner_email || "").toLowerCase();
+                                const borrowerEmailKey = String(b.borrower_email || "").toLowerCase();
+                                
+                                // Se esiste il profilo esteso usa quello, altrimenti usa il vecchio valore o l'email
+                                const donorFormatted = profileMap[ownerEmailKey] || String(b.owner_name || b.owner_email || "Anonimo");
+
                                 return {
                                     id: String(b.id),
                                     title: String(b.title || ""),
                                     author: String(b.authors || ""),
-                                    donor: String(b.owner_name || b.owner_email || "Anonimo"),
+                                    donor: donorFormatted,
                                     date: String(b.timestamp || "").split(" ")[0] || "",
                                     status: String(b.status || "disponibile").toLowerCase(),
                                     currentHolder: String(b.borrower_email || "")
@@ -330,9 +347,12 @@ await supabaseClient.auth.signInWithOAuth({
                             });
 
                             const mappedMovements = (movements || []).map(m => {
+                                const operatorEmailKey = String(m.operator_email || "").toLowerCase();
+                                const utenteFormatted = profileMap[operatorEmailKey] || String(m.operator_name || m.operator_email || "Utente");
+
                                 return {
                                     timestamp: String(m.timestamp || ""),
-                                    utente: String(m.operator_name || m.operator_email || "Utente"),
+                                    utente: utenteFormatted,
                                     user_email: String(m.operator_email || ""),
                                     azione: String(m.type || "-"),
                                     titolo: String(m.book_title || "Libro"),
@@ -348,6 +368,10 @@ await supabaseClient.auth.signInWithOAuth({
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            
+                            // Recupera il profilo esteso dell'utente corrente per salvarlo direttamente nel record
+                            const { data: profile } = await localClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
+                            const userString = profile ? `${profile.name} ${profile.surname} (${profile.class}${profile.section || ''})` : currentUserEmail;
 
                             const { data: newBook, error: bookError } = await localClient
                                 .from('books')
@@ -357,7 +381,7 @@ await supabaseClient.auth.signInWithOAuth({
                                         authors: payload.authors, 
                                         status: 'disponibile',
                                         owner_email: currentUserEmail,
-                                        owner_name: currentUserName || currentUserEmail.split('@')[0],
+                                        owner_name: userString,
                                         borrower_email: null,
                                         borrower_name: null,
                                         subject: "",
@@ -373,7 +397,7 @@ await supabaseClient.auth.signInWithOAuth({
                                     book_title: payload.title,
                                     type: 'DONAZIONE',
                                     operator_email: currentUserEmail,
-                                    operator_name: currentUserName || currentUserEmail.split('@')[0],
+                                    operator_name: userString,
                                     timestamp: time
                                 }
                             ]);
@@ -386,12 +410,15 @@ await supabaseClient.auth.signInWithOAuth({
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
                             
+                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
+                            const { data: profile } = await localClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
+                            const userString = profile ? `${profile.name} ${profile.surname} (${profile.class}${profile.section || ''})` : currentUserEmail;
+
                             await localClient.from('books').update({ 
                                 status: 'Ritirato', 
                                 borrower_email: currentUserEmail, 
-                                borrower_name: currentUserName || currentUserEmail.split('@')[0] 
+                                borrower_name: userString 
                             }).eq('id', bookId);
 
                             await localClient.from('movements').insert([{
@@ -399,7 +426,7 @@ await supabaseClient.auth.signInWithOAuth({
                                 book_title: book.title, 
                                 type: 'RITIRO',
                                 operator_email: currentUserEmail, 
-                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                operator_name: userString, 
                                 timestamp: time
                             }]);
                             if (this.successCallback) this.successCallback();
@@ -410,8 +437,11 @@ await supabaseClient.auth.signInWithOAuth({
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                            const { data: oldBook } = await localClient.from('books').select('*').eq('id', bookId).single();
                             
+                            const { data: oldBook } = await localClient.from('books').select('*').eq('id', bookId).single();
+                            const { data: profile } = await localClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
+                            const userString = profile ? `${profile.name} ${profile.surname} (${profile.class}${profile.section || ''})` : currentUserEmail;
+
                             await localClient.from('books').update({ status: 'Scambiato' }).eq('id', bookId);
                             
                             const { data: newBook, error: newBookError } = await localClient.from('books').insert([{
@@ -419,7 +449,7 @@ await supabaseClient.auth.signInWithOAuth({
                                 authors: newAuthor, 
                                 status: 'disponibile',
                                 owner_email: currentUserEmail, 
-                                owner_name: currentUserName || currentUserEmail.split('@')[0], 
+                                owner_name: userString, 
                                 timestamp: time
                             }]).select().single();
 
@@ -431,7 +461,7 @@ await supabaseClient.auth.signInWithOAuth({
                                 book_title: detail, 
                                 type: 'SCAMBIO',
                                 operator_email: currentUserEmail, 
-                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                operator_name: userString, 
                                 timestamp: time
                             }]);
                             
@@ -443,8 +473,11 @@ await supabaseClient.auth.signInWithOAuth({
                         try {
                             const time = new Date().toLocaleString('it-IT');
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
                             
+                            const { data: book } = await localClient.from('books').select('*').eq('id', bookId).single();
+                            const { data: profile } = await localClient.from('profiles').select().eq('email', currentUserEmail).maybeSingle();
+                            const userString = profile ? `${profile.name} ${profile.surname} (${profile.class}${profile.section || ''})` : currentUserEmail;
+
                             await localClient.from('books').update({ 
                                 status: 'disponibile', 
                                 borrower_email: null, 
@@ -456,7 +489,7 @@ await supabaseClient.auth.signInWithOAuth({
                                 book_title: book.title, 
                                 type: 'RESTITUZIONE',
                                 operator_email: currentUserEmail, 
-                                operator_name: currentUserName || currentUserEmail.split('@')[0], 
+                                operator_name: userString, 
                                 timestamp: time
                             }]);
                             if (this.successCallback) this.successCallback();
@@ -516,11 +549,10 @@ await supabaseClient.auth.signInWithOAuth({
                 // CONTROLLO PRIMO ACCESSO: Verifica se il profilo esiste ed è completo
                 window.google.script.run.withSuccessHandler(function(profile) {
                     if (!profile || !profile.name || !profile.surname || !profile.class) {
-                        // Se il profilo manca o è incompleto, forza l'apertura del modale in modalità bloccata
                         openProfileModal(true); 
                     } else {
-                        // Se è completo, imposta il nome nell'header graficamente
-                        let currentUserFullName = (profile.name + " " + profile.surname).trim();
+                        // MODIFICA QUI: Mostra Nome Cognome (Classe) anche al riavvio dell'app
+                        let currentUserFullName = `${profile.name} ${profile.surname} (${profile.class}${profile.section || ''})`;
                         if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
                         const avatar = document.getElementById('avatar');
                         if(avatar && profile.name) avatar.innerText = profile.name.charAt(0).toUpperCase();
@@ -785,27 +817,32 @@ await supabaseClient.auth.signInWithOAuth({
             }
         }
 
-        function saveProfile() {
+       function saveProfile() {
             const nameVal = document.getElementById('profile-name').value.trim();
             const surnameVal = document.getElementById('profile-surname').value.trim();
             const classVal = document.getElementById('profile-class').value.trim();
             const sectionVal = document.getElementById('profile-section').value.trim();
             const yearVal = document.getElementById('profile-year').value.trim();
 
-            // Validazione: blocca il salvataggio se i campi fondamentali sono vuoti
             if (!nameVal || !surnameVal || !classVal || !yearVal) {
                 alert("Tutti i campi (Nome, Cognome, Classe e Anno Scolastico) sono obbligatori per registrarsi!");
                 return;
             }
 
-            const payload = {
-                name: nameVal,
-                surname: surnameVal,
-                class: classVal,
-                section: sectionVal,
-                year: yearVal
-            };
+            const payload = { name: nameVal, surname: surnameVal, class: classVal, section: sectionVal, year: yearVal };
 
+            window.google.script.run.withSuccessHandler(function() {
+                // MODIFICA QUI: Mostra Nome Cognome (Classe) nell'interfaccia
+                let currentUserFullName = `${payload.name} ${payload.surname} (${payload.class}${payload.section || ''})`;
+                if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+                const avatar = document.getElementById('avatar');
+                if(avatar && payload.name) avatar.innerText = payload.name.charAt(0).toUpperCase();
+                
+                closeProfileModal();
+                alert("Profilo registrato con successo! Ora puoi usare l'app.");
+                initApp(); 
+            }).saveProfile(payload);
+        }
             window.google.script.run.withSuccessHandler(function() {
                 let currentUserFullName = (payload.name + " " + payload.surname).trim();
                 if (document.getElementById('user-display')) document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
