@@ -490,17 +490,18 @@ await supabaseClient.auth.signInWithOAuth({
             }
         };
 
-        // VARIABILI GLOBALI PER I DATI
+// VARIABILI GLOBALI PER I DATI
         let allBooks = [];
         let allMovements = [];
+        let currentExchangeBookId = null; // Traccia quale libro si sta scambiando
 
-        // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT (CORRETTA)
+        // L'UNICA FUNZIONE initApp() CHE GESTISCE IL CARICAMENTO E IL LAYOUT
         function initApp() {
             window.google.script.run.withSuccessHandler(function(data) {
                 allBooks = data.books || [];
                 allMovements = data.movements || [];
                 
-                // BUG FIX: All'avvio mostra nel catalogo SOLO i libri disponibili
+                // Forza il caricamento iniziale mostrando SOLO i libri realmente disponibili
                 const availableBooks = allBooks.filter(b => b.status === 'disponibile');
                 renderBooks(availableBooks);
                 renderHistory(allMovements);
@@ -514,13 +515,13 @@ await supabaseClient.auth.signInWithOAuth({
             }).loadAllData();
         }
 
-       // Genera visivamente le schede dei libri nel catalogo dinamico (CORRETTA)
+        // Genera visivamente le schede dei libri nel catalogo dinamico
         function renderBooks(booksList) {
             const grid = document.getElementById('books-grid');
             if (!grid) return;
             grid.innerHTML = "";
 
-            // Filtra via i libri scambiati a prescindere, non devono mai apparire in nessuna vista
+            // Esclude tassativamente i libri scambiati da qualsiasi tipo di renderizzazione
             const validBooks = booksList.filter(b => b.status !== 'scambiato');
 
             if (validBooks.length === 0) {
@@ -562,6 +563,7 @@ await supabaseClient.auth.signInWithOAuth({
                 `;
             });
         }
+
         // Genera le righe dello storico dei movimenti
         function renderHistory(movementsList) {
             const body = document.getElementById('history-body');
@@ -584,7 +586,8 @@ await supabaseClient.auth.signInWithOAuth({
                 `;
             });
         }
-       // Gestione dei Menu/Viste (Catalogo Filtrato, Miei Prestiti, Movimenti)
+
+        // Gestione dei Menu/Viste (Catalogo Filtrato, Miei Prestiti, Movimenti)
         function switchView(view) {
             const catalogBtn = document.getElementById('btn-catalog');
             const myBooksBtn = document.getElementById('btn-my-books');
@@ -605,7 +608,6 @@ await supabaseClient.auth.signInWithOAuth({
                 if(searchBar) searchBar.classList.remove('hidden');
                 if(title) title.innerText = "Catalogo Libri";
                 
-                // PUNTO 1: Mostra nel catalogo SOLO i libri disponibili
                 const availableBooks = allBooks.filter(b => b.status === 'disponibile');
                 renderBooks(availableBooks);
             } else if (view === 'my-books') {
@@ -621,15 +623,21 @@ await supabaseClient.auth.signInWithOAuth({
                 if(historyBtn) historyBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
                 if(grid) grid.classList.add('hidden');
                 if(history) history.classList.remove('hidden');
-                if(searchBar) searchBar.classList.add('hidden');
+                if(searchBar) searchBar.className = "hidden";
                 if(title) title.innerText = "Movimenti Registro";
                 renderHistory(allMovements);
             }
         }
-        // Funzione per filtrare i libri in tempo reale nella barra di ricerca
+
+        // Filtro di ricerca real-time nel fondo comune
         function onSearchInput() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
-            const filtered = allBooks.filter(b => 
+            const currentTab = document.getElementById('btn-catalog').classList.contains('text-blue-900') ? 'catalog' : 'my-books';
+            
+            // Applica il filtro della scheda corrente prima della ricerca testuale
+            let baseBooks = currentTab === 'catalog' ? allBooks.filter(b => b.status === 'disponibile') : allBooks.filter(b => b.currentHolder === currentUserEmail);
+            
+            const filtered = baseBooks.filter(b => 
                 b.title.toLowerCase().includes(query) || 
                 b.author.toLowerCase().includes(query) || 
                 b.donor.toLowerCase().includes(query)
@@ -637,7 +645,6 @@ await supabaseClient.auth.signInWithOAuth({
             renderBooks(filtered);
         }
 
-        // Funzione per filtrare i movimenti nel registro storico
         function onHistorySearchInput() {
             const query = document.getElementById('history-search').value.toLowerCase().trim();
             const filtered = allMovements.filter(m => 
@@ -646,39 +653,6 @@ await supabaseClient.auth.signInWithOAuth({
                 m.azione.toLowerCase().includes(query)
             );
             renderHistory(filtered);
-        }
-
-        // Logica per aggiungere/donare un nuovo libro
-        function submitBook() {
-            const btn = document.getElementById('submit-btn');
-            const titleInput = document.getElementById('book-title');
-            const authorInput = document.getElementById('book-author');
-
-            if(!titleInput || !authorInput) return;
-            if(btn) btn.disabled = true;
-
-            const payload = {
-                title: titleInput.value.trim(),
-                authors: authorInput.value.trim(),
-                subject: ""
-            };
-
-            if (!payload.title || !payload.authors) {
-                alert("Per favore, compila sia il titolo che l'autore!");
-                if(btn) btn.disabled = false;
-                return;
-            }
-
-            window.google.script.run.withSuccessHandler(function() {
-                titleInput.value = "";
-                authorInput.value = "";
-                if(btn) btn.disabled = false;
-                closeModal();
-                initApp();
-            }).withFailureHandler(function(err) {
-                console.error("Errore inserimento:", err);
-                if(btn) btn.disabled = false;
-            }).addBook(payload);
         }
 
         // Funzione per gestire l'azione di prestito (Ritiro)
@@ -696,9 +670,6 @@ await supabaseClient.auth.signInWithOAuth({
                 initApp();
             }).returnBook(bookId);
         }
-
-       // VARIABILE GLOBALE PER TRACCIARE QUALE LIBRO SI STA SCAMBIANDO
-        let currentExchangeBookId = null;
 
         // Gestione finestre Modali (Adattata per supportare sia inserimento da zero che Scambio)
         function openModal(mode) {
@@ -718,7 +689,7 @@ await supabaseClient.auth.signInWithOAuth({
             }
         }
 
-        // PUNTO 3: Apre lo stesso identico Modale ma lo configura graficamente per lo Scambio
+        // Apre lo stesso identico Modale ma lo configura graficamente per lo Scambio
         function openExchangeModal(bookId) {
             currentExchangeBookId = bookId;
             const modal = document.getElementById('modal');
@@ -726,7 +697,6 @@ await supabaseClient.auth.signInWithOAuth({
             const title = document.getElementById('modal-title');
             const sub = title ? title.nextElementSibling : null;
 
-            // Recupera il titolo del vecchio libro per mostrare un'interfaccia personalizzata ma identica
             const oldBook = allBooks.find(b => b.id === bookId);
             const oldTitle = oldBook ? oldBook.title : "selezionato";
 
@@ -800,7 +770,7 @@ await supabaseClient.auth.signInWithOAuth({
             }).saveProfile(payload);
         }
 
-        // Dirotta il salvataggio verso addBook o exchangeBook a seconda di come è stato aperto il modale
+        // Gestisce l'invio e dirotterà l'azione a seconda della modalità (Inserimento o Scambio)
         function submitBook() {
             const btn = document.getElementById('submit-btn');
             const titleInput = document.getElementById('book-title');
@@ -819,7 +789,6 @@ await supabaseClient.auth.signInWithOAuth({
             if(btn) btn.disabled = true;
 
             if (currentExchangeBookId) {
-                // Esegue l'azione di scambio
                 window.google.script.run.withSuccessHandler(function() {
                     closeModal();
                     initApp();
@@ -828,7 +797,6 @@ await supabaseClient.auth.signInWithOAuth({
                     if(btn) btn.disabled = false;
                 }).exchangeBook(currentExchangeBookId, newTitle, newAuthor);
             } else {
-                // Esegue l'inserimento standard da zero
                 const payload = { title: newTitle, authors: newAuthor, subject: "" };
                 window.google.script.run.withSuccessHandler(function() {
                     closeModal();
