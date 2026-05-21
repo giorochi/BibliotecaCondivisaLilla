@@ -219,20 +219,22 @@
                     <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Cognome</label>
                     <input id="profile-surname" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="Cognome">
                 </div>
-                <div class="flex gap-3">
-                    <div class="flex-1">
-                        <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Classe</label>
-                        <input id="profile-class" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 3">
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Sezione</label>
-                        <input id="profile-section" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. A">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Anno scolastico</label>
-                    <input id="profile-year" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 2025/2026">
-                </div>
+                <div id="wrapper-interno" class="space-y-4">
+    <div class="flex gap-3">
+        <div class="flex-1">
+            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Classe</label>
+            <input id="profile-class" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 3">
+        </div>
+        <div class="flex-1">
+            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Sezione</label>
+            <input id="profile-section" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. A">
+        </div>
+    </div>
+    <div>
+        <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Anno scolastico</label>
+        <input id="profile-year" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 2025/2026">
+    </div>
+</div>
                 <div id="wrapper-esterno" class="space-y-4 hidden">
     <div class="flex gap-3">
         <div class="flex-1">
@@ -592,14 +594,15 @@ await supabaseClient.auth.signInWithOAuth({
     const esternoWrapper = document.getElementById('wrapper-esterno');
     
     if (type === 'esterno') {
-        if(internoWrapper) internoWrapper.classList.add('hidden');
-        if(esternoWrapper) esternoWrapper.classList.remove('hidden');
+        // Se l'utente è esterno, nascondiamo classe/anno e mostriamo età/provenienza
+        if (internoWrapper) internoWrapper.classList.add('hidden');
+        if (esternoWrapper) esternoWrapper.classList.remove('hidden');
     } else {
-        if(internoWrapper) internoWrapper.classList.remove('hidden');
-        if(esternoWrapper) esternoWrapper.classList.add('hidden');
+        // Se l'utente è interno, facciamo l'esatto contrario
+        if (internoWrapper) internoWrapper.classList.remove('hidden');
+        if (esternoWrapper) esternoWrapper.classList.add('hidden');
     }
 }
-
         // Genera visivamente le schede dei libri nel catalogo dinamico
         function renderBooks(booksList) {
             const grid = document.getElementById('books-grid');
