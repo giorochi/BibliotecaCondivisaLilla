@@ -833,114 +833,22 @@ let currentExchangeBookTitle = ""; // <-- AGGIUNGI QUESTA RIGA QUI
         }
 
         // Gestione finestre Modali
-        // Gestione finestre Modali
         function openModal() { 
             document.getElementById('modal').classList.remove('hidden'); 
             document.getElementById('modal').classList.add('flex'); 
             setTimeout(() => document.getElementById('modal-container').classList.remove('scale-95', 'opacity-0'), 10); 
-
-            // CORRETTO: Usiamo 'submit-btn' che esiste nell'HTML
-            const submitBtn = document.getElementById('submit-btn');
-            if (!submitBtn) return;
-
-            submitBtn.onclick = async function() {
-                // CORRETTO: Usiamo gli ID corretti degli input dell'HTML
-                const titleInput = document.getElementById('book-title');
-                const authorInput = document.getElementById('book-author');
-                
-                if (!titleInput || !authorInput) return;
-                
-                const newTitle = titleInput.value.trim();
-                const newAuthor = authorInput.value.trim();
-                
-                if (!newTitle || !newAuthor) {
-                    alert("Inserisci titolo e autore del libro.");
-                    return;
-                }
-                
-                const btn = this;
-                btn.disabled = true;
-
-                const formattedDate = new Date().toLocaleString('it-IT');
-
-                try {
-                    if (currentExchangeBookId) {
-                        // --- CASO SCAMBIO ---
-                        window.google.script.run.withSuccessHandler(async function() {
-                            try {
-                                const { error: movError } = await supabaseClient
-                                    .from('movements')
-                                    .insert([
-                                        {
-                                            book_id: currentExchangeBookId,
-                                            book_title: `Preso: "${currentExchangeBookTitle}" | Donato: "${newTitle}"`,
-                                            type: 'SCAMBIO',
-                                            operator_email: currentUserEmail,
-                                            operator_name: currentUserName,
-                                            timestamp: formattedDate
-                                        }
-                                    ]);
-
-                                if(movError) throw movError;
-                                
-                                closeModal();
-                                await initApp();
-                                alert("Scambio completato con successo!");
-                            } catch(err) {
-                                console.error(err);
-                                alert("Errore registrazione movimento su Supabase: " + err.message);
-                            } finally {
-                                btn.disabled = false;
-                            }
-                        }).withFailureHandler(function(err){
-                            alert("Errore durante lo scambio: " + err.message);
-                            btn.disabled = false;
-                        }).exchangeBook(currentExchangeBookId, newTitle, newAuthor);
-                    } else {
-                        // --- CASO DONAZIONE STANDARD ---
-                        const payload = { title: newTitle, authors: newAuthor, subject: "" };
-                        window.google.script.run.withSuccessHandler(async function() {
-                            try {
-                                const { error: movError } = await supabaseClient
-                                    .from('movements')
-                                    .insert([
-                                        {
-                                            operator_email: currentUserEmail,
-                                            operator_name: currentUserName,
-                                            type: 'DONAZIONE',
-                                            book_title: newTitle,
-                                            timestamp: formattedDate
-                                        }
-                                    ]);
-
-                                if(movError) throw movError;
-
-                                titleInput.value = "";
-                                authorInput.value = "";
-                                closeModal();
-                                await initApp();
-                            } catch(err) {
-                                console.error(err);
-                                alert("Errore registrazione donazione su Supabase: " + err.message);
-                            } finally {
-                                btn.disabled = false;
-                            }
-                        }).withFailureHandler(function(err) {
-                            alert("Errore durante la donazione: " + err.message);
-                            btn.disabled = false;
-                        }).addBook(payload);
-                    }
-                } catch (err) {
-                    console.error("Errore generale:", err);
-                    btn.disabled = false;
-                }
-            };
+            
+            // Pulizia preventiva dei campi ad ogni apertura
+            const titleInput = document.getElementById('book-title');
+            const authorInput = document.getElementById('book-author');
+            if (titleInput) titleInput.value = "";
+            if (authorInput) authorInput.value = "";
         }
-       // Apre lo stesso identico Modale ma lo configura graficamente per lo Scambio
+      // Apre lo stesso identico Modale ma lo configura graficamente per lo Scambio
         function openExchangeModal(bookId) {
             currentExchangeBookId = bookId;
             
-            // CORRETTO: Usiamo l'array corretto 'allBooks' anziché 'booksGlobal'
+            // CORRETTO: Usiamo allBooks anziché booksGlobal
             const book = allBooks.find(b => b.id === bookId);
             currentExchangeBookTitle = book ? book.title : "Sconosciuto";
 
@@ -1069,127 +977,127 @@ let currentExchangeBookTitle = ""; // <-- AGGIUNGI QUESTA RIGA QUI
         }
 
         // Gestisce l'invio e dirotterà l'azione a seconda della modalità (Inserimento o Scambio)
-       async function submitBook() {
-    const btn = document.getElementById('submit-btn');
-    const titleInput = document.getElementById('book-title');
-    const authorInput = document.getElementById('book-author');
+        async function submitBook() {
+            const btn = document.getElementById('submit-btn');
+            const titleInput = document.getElementById('book-title');
+            const authorInput = document.getElementById('book-author');
 
-    if(!titleInput || !authorInput) return;
+            if(!titleInput || !authorInput) return;
 
-    const newTitle = titleInput.value.trim();
-    const newAuthor = authorInput.value.trim();
+            const newTitle = titleInput.value.trim();
+            const newAuthor = authorInput.value.trim();
 
-    if (!newTitle || !newAuthor) {
-        alert("Per favore, compila sia il titolo che l'autore!");
-        return;
-    }
+            if (!newTitle || !newAuthor) {
+                alert("Per favore, compila sia il titolo che l'autore!");
+                return;
+            }
 
-    if(btn) btn.disabled = true;
+            if(btn) btn.disabled = true;
 
-    try {
-        if (currentExchangeBookId) {
-            // 1. Aggiorna lo stato del vecchio libro in 'scambiato'
-            const { error: updateError } = await supabaseClient
-                .from('books')
-                .update({ 
-                    status: 'scambiato', 
-                    borrower_email: currentUserEmail 
-                })
-                .eq('id', currentExchangeBookId);
+            // Formato data identico a presa/restituzione: GG/MM/AAAA, HH:MM:SS
+            const formattedDate = new Date().toLocaleString('it-IT');
 
-            if(updateError) throw updateError;
+            try {
+                if (currentExchangeBookId) {
+                    // 1. Aggiorna lo stato del vecchio libro in 'scambiato'
+                    const { error: updateError } = await supabaseClient
+                        .from('books')
+                        .update({ 
+                            status: 'scambiato', 
+                            borrower_email: currentUserEmail 
+                        })
+                        .eq('id', currentExchangeBookId);
 
-            // 2. Inserisce il nuovo libro messo a disposizione in cambio
-            const { error: insertError } = await supabaseClient
-                .from('books')
-                .insert([
-                    {
-                        title: newTitle,
-                        authors: newAuthor,
-                        owner_email: currentUserEmail,
-                        owner_name: currentUserName,
-                        status: 'disponibile',
-                        timestamp: new Date().toISOString()
-                    }
-                ]);
+                    if(updateError) throw updateError;
 
-            if(insertError) throw insertError;
+                    // 2. Inserisce il nuovo libro messo a disposizione in cambio
+                    const { error: insertError } = await supabaseClient
+                        .from('books')
+                        .insert([
+                            {
+                                title: newTitle,
+                                authors: newAuthor,
+                                owner_email: currentUserEmail,
+                                owner_name: currentUserName,
+                                status: 'disponibile',
+                                timestamp: formattedDate
+                            }
+                        ]);
 
-            // 3. Registra il movimento di SCAMBIO
-            const { error: movError } = await supabaseClient
-                .from('movements')
-                .insert([
-                    {
-                        operator_email: currentUserEmail,
-                        operator_name: currentUserName,
-                        type: 'SCAMBIO',
-                        book_title: newTitle,
-                        timestamp: new Date().toISOString()
-                    }
-                ]);
+                    if(insertError) throw insertError;
 
-            if(movError) throw movError;
-            alert("Scambio completato con successo!");
+                    // 3. Registra il movimento di SCAMBIO includendo cosa è stato preso e cosa donato
+                    const { error: movError } = await supabaseClient
+                        .from('movements')
+                        .insert([
+                            {
+                                book_id: currentExchangeBookId,
+                                book_title: `Preso: "${currentExchangeBookTitle}" | Donato: "${newTitle}"`,
+                                type: 'SCAMBIO',
+                                operator_email: currentUserEmail,
+                                operator_name: currentUserName,
+                                timestamp: formattedDate
+                            }
+                        ]);
 
-        } else {
-            // 1. Inserisce il libro donato
-            const { error: insertError } = await supabaseClient
-                .from('books')
-                .insert([
-                    {
-                        title: newTitle,
-                        authors: newAuthor,
-                        owner_email: currentUserEmail,
-                        owner_name: currentUserName,
-                        status: 'disponibile',
-                        timestamp: new Date().toISOString()
-                    }
-                ]);
+                    if(movError) throw movError;
+                    alert("Scambio completato con successo!");
 
-            if(insertError) throw insertError;
+                } else {
+                    // --- CASO DONAZIONE STANDARD ---
+                    // 1. Inserisce il libro donato
+                    const { error: insertError } = await supabaseClient
+                        .from('books')
+                        .insert([
+                            {
+                                title: newTitle,
+                                authors: newAuthor,
+                                owner_email: currentUserEmail,
+                                owner_name: currentUserName,
+                                status: 'disponibile',
+                                timestamp: formattedDate
+                            }
+                        ]);
 
-            // 2. Registra il movimento di DONAZIONE
-            const { error: movError } = await supabaseClient
-                .from('movements')
-                .insert([
-                    {
-                        operator_email: currentUserEmail,
-                        operator_name: currentUserName,
-                        type: 'DONAZIONE',
-                        book_title: newTitle,
-                        timestamp: new Date().toISOString()
-                    }
-                ]);
+                    if(insertError) throw insertError;
 
-            if(movError) throw movError;
-            alert("Libro donato con successo!");
+                    // 2. Registra il movimento di DONAZIONE
+                    const { error: movError } = await supabaseClient
+                        .from('movements')
+                        .insert([
+                            {
+                                operator_email: currentUserEmail,
+                                operator_name: currentUserName,
+                                type: 'DONAZIONE',
+                                book_title: newTitle,
+                                timestamp: formattedDate
+                            }
+                        ]);
+
+                    if(movError) throw movError;
+                    alert("Libro donato con successo!");
+                }
+
+                // Resetta i campi del form, chiude il popup e aggiorna i dati a schermo
+                titleInput.value = "";
+                authorInput.value = "";
+                
+                // Resetta lo stato dello scambio per le successive aperture
+                currentExchangeBookId = null;
+                currentExchangeBookTitle = "";
+                const modalTitle = document.getElementById('modal-title');
+                if(modalTitle) modalTitle.innerText = "Dona un libro";
+
+                closeModal();
+                await initApp();
+
+            } catch (err) {
+                console.error("Errore durante il salvataggio:", err);
+                alert("Errore durante il salvataggio: " + err.message);
+            } finally {
+                if(btn) btn.disabled = false;
+            }
         }
-
-        // Resetta i campi del form, chiude il popup e aggiorna i dati a schermo
-        titleInput.value = "";
-        authorInput.value = "";
-        closeModal();
-        await initApp();
-
-    } catch (err) {
-        console.error("Errore durante il salvataggio:", err);
-        alert("Errore durante il salvataggio: " + err.message);
-    } finally {
-        if(btn) btn.disabled = false;
-    }
-}
-        async function handleLogout() {
-    if (confirm("Sei sicuro di voler uscire dal tuo account?")) {
-        try {
-            // Dice a Supabase di chiudere la sessione
-            await supabaseClient.auth.signOut();
-            // Ricarica la pagina per rimandare l'utente alla schermata di login di Google
-            window.location.reload();
-        } catch (err) {
-            alert("Errore durante il logout: " + err.message);
-        }
-    }
-}
     </script>
 
     <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-[#a38a75] select-none font-bold">Progettato da Giovanni Rochira</footer>
