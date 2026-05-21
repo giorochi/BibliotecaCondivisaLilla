@@ -88,16 +88,30 @@
 <body class="bg-[#f9f7f4] text-stone-800 min-h-screen">
 
     <div id="loader" class="fixed inset-0 bg-[#f9f7f4] z-[200] flex flex-col items-center justify-center transition-opacity duration-500">
-        <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Lilla" class="h-24 mb-6 animate-pulse">
+        <div class="flex items-center gap-6 mb-6">
+            <img src="download.jpg" onerror="this.src='https://via.placeholder.com/150?text=Logo+Scuola'" alt="Logo Scuola" class="h-20 w-20 object-contain animate-pulse">
+            <div class="h-16 w-[2px] bg-stone-300"></div>
+            <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Lilla" class="h-20 w-20 object-contain animate-pulse">
+        </div>
         <div class="loader-spin mb-4"></div>
         <p class="text-[10px] font-black uppercase tracking-[0.4em] text-[#73563d] italic">Pagine Condivise - Liceo Lilla</p>
     </div>
 
     <header class="bg-white/95 backdrop-blur-md border-b-4 gold-border p-4 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-5">
-                <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Scuola" class="h-16 hidden sm:block">
-                <div class="h-12 w-[2px] bg-stone-100 hidden sm:block"></div>
+            <div class="flex items-center gap-4">
+                <!-- Primo Logo: Logo Scuola -->
+                <img src="download.jpg" onerror="this.src='https://via.placeholder.com/150?text=Logo+Scuola'" alt="Logo Scuola" class="h-16 w-16 object-contain hidden sm:block">
+                
+                <!-- Separatore verticale -->
+                <div class="h-12 w-[2px] bg-[#e3decb] hidden sm:block"></div>
+                
+                <!-- Secondo Logo: Logo Progetto Pagine Condivise -->
+                <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Progetto" class="h-16 w-16 object-contain hidden sm:block">
+                
+                <!-- Separatore verticale -->
+                <div class="h-12 w-[2px] bg-[#e3decb] hidden sm:block"></div>
+                
                 <div>
                     <h1 class="text-xl font-black tracking-tighter uppercase italic leading-none text-[#73563d] serif">Pagine Condivise</h1>
                     <p class="text-[9px] font-bold text-[#a38a75] uppercase tracking-[0.2em] mt-1">I.I.S.S. "Vincenzo Lilla"</p>
@@ -645,7 +659,7 @@
                         <h4 class="font-black text-xl text-[#73563d] tracking-tight leading-tight mb-1 serif">${book.title}</h4>
                         <p class="text-stone-500 text-xs font-bold uppercase tracking-wide mb-4">${book.author}</p>
                         <div class="pt-4 border-t border-stone-50 text-[11px] text-stone-400">
-                            <span class="font-medium">Donato da:</span> <span class="font-bold text-stone-600">${book.donor}</span>
+                            <span class="font-medium">Donato da:</span> <span class="font-bold text-slate-600">${book.donor}</span>
                         </div>
                         ${actionButton}
                     </div>
@@ -957,6 +971,6 @@
         }
     </script>
 
-    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-stone-400 select-none">Progettato da Giovanni Rochira</footer>
+    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-[#a38a75] select-none">Progettato da Giovanni Rochira</footer>
 </body>
 </html>
