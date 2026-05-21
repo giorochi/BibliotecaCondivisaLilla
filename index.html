@@ -581,12 +581,15 @@
                             if (this.successCallback) this.successCallback(data);
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     }
+                }
+            }
+        };
 
         // VARIABILI GLOBALI PER I DATI (Lasciale così come sono)
         let allBooks = [];
         let allMovements = [];
         let currentExchangeBookId = null;
-let currentExchangeBookTitle = ""; // <-- AGGIUNGI QUESTA RIGA QUI 
+        let currentExchangeBookTitle = "";
 
         // QUESTA È L'UNICA FUNZIONE initApp() CHE DEVE RIMANERE
         function initApp() {
