@@ -609,11 +609,33 @@
                     setTimeout(() => loader.remove(), 500);
                 }
 
-                // CONTROLLO PROFILO: Verifica se il profilo esiste ed è completo
+                // CONTROLLO PROFILO CORRETTO: Distingue tra studenti (interni) ed utenti esterni
                 window.google.script.run.withSuccessHandler(function(profile) {
-                    if (!profile || !profile.name || !profile.surname || !profile.class) {
+                    // 1. Controlliamo se mancano i dati di base fondamentali
+                    if (!profile || !profile.name || !profile.surname) {
                         openProfileModal(true); 
-                    } else {
+                        return;
+                    }
+
+                    // 2. Se l'utente ha compilato il campo provenienza, viene trattato come UTENTE ESTERNO
+                    if (profile.provenance) {
+                        let currentUserFullName = `${profile.name} ${profile.surname} (Esterno)`;
+                        if (document.getElementById('user-display')) {
+                            document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+                        }
+                        const avatar = document.getElementById('avatar');
+                        if (avatar && profile.name) {
+                            avatar.innerText = profile.name.charAt(0).toUpperCase();
+                        }
+                    } 
+                    // 3. Altrimenti viene trattato come UTENTE INTERNO (Studente)
+                    else {
+                        // Se è uno studente ma mancano classe o anno scolastico, forziamo il completamento
+                        if (!profile.class || !profile.year) {
+                            openProfileModal(true);
+                            return;
+                        }
+
                         let currentUserFullName = `${profile.name} ${profile.surname} (${profile.class}${profile.section || ''})`;
                         if (document.getElementById('user-display')) {
                             document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
@@ -627,7 +649,6 @@
 
             }).loadAllData();
         }
-
         function toggleUserTypeFields() {
             const type = document.getElementById('profile-type').value;
             const internoWrapper = document.getElementById('wrapper-interno');
