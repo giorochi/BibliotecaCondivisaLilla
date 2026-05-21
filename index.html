@@ -25,23 +25,23 @@
 
         /* Cards */
         .book-card { transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1); -webkit-tap-highlight-color: transparent; }
-        .book-card:hover { transform: translateY(-8px); box-shadow: 0 14px 20px -6px rgba(0,0,0,0.08), 0 6px 8px -6px rgba(0,0,0,0.06); }
+        .book-card:hover { transform: translateY(-8px); box-shadow: 0 14px 20px -6px rgba(115,86,61,0.08), 0 6px 8px -6px rgba(115,86,61,0.06); }
 
         /* Entrance animation */
         @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
         .animate-card { animation: slideUp 0.42s ease-out forwards; }
 
         /* Loader */
-        .loader-spin { border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
+        .loader-spin { border: 3px solid #f3eedf; border-top: 3px solid #73563d; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Colors */
-        .gradient-bg { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
-        .gold-border { border-color: #cbb26a; }
+        /* Colors based on logo */
+        .gradient-bg { background: linear-gradient(135deg, #73563d 0%, #a38a75 100%); }
+        .gold-border { border-color: #c5ab8e; }
 
         /* Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height:6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e3decb; border-radius: 10px; }
 
         /* Touch-friendly sizes */
         button, .px-6, .px-8 { min-height: 48px; padding-top: 0.6rem; padding-bottom: 0.6rem; }
@@ -71,12 +71,12 @@
             #history-container table { display: block; width: 100%; -webkit-overflow-scrolling: touch; }
             #history-container thead { display: none; } 
             #history-container tbody { display: block; max-height: 56vh; overflow: auto; }
-            #history-container tr.history-row { display: block; margin-bottom: 0.6rem; background: #fff; border-radius: 1rem; padding: 0.6rem 0.8rem; box-shadow: 0 6px 12px rgba(2,6,23,0.04); }
+            #history-container tr.history-row { display: block; margin-bottom: 0.6rem; background: #fff; border-radius: 1rem; padding: 0.6rem 0.8rem; box-shadow: 0 6px 12px rgba(115,86,61,0.04); }
             #history-container td { display: block; padding: 6px 0; border: none; }
-            #history-container td:first-child { color: #94a3b8; font-size: 12px; }
-            #history-container td:nth-child(2) { font-weight: 800; color: #0f172a; }
+            #history-container td:first-child { color: #a38a75; font-size: 12px; }
+            #history-container td:nth-child(2) { font-weight: 800; color: #403225; }
             #history-container td:nth-child(3) { padding-top: 6px; }
-            #history-container td:nth-child(4) { font-style: italic; color: #334155; padding-top: 6px; }
+            #history-container td:nth-child(4) { font-style: italic; color: #5a493b; padding-top: 6px; }
             #history-container td.p-6 { padding: 0.6rem 0; }
         }
 
@@ -85,30 +85,30 @@
         }
     </style>
 </head>
-<body class="bg-[#fcfdfe] text-slate-900 min-h-screen">
+<body class="bg-[#f9f7f4] text-stone-800 min-h-screen">
 
-    <div id="loader" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center transition-opacity duration-500">
+    <div id="loader" class="fixed inset-0 bg-[#f9f7f4] z-[200] flex flex-col items-center justify-center transition-opacity duration-500">
         <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Lilla" class="h-24 mb-6 animate-pulse">
         <div class="loader-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-blue-900 italic">Pagine Condivise - Liceo Lilla</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-[#73563d] italic">Pagine Condivise - Liceo Lilla</p>
     </div>
 
-    <header class="bg-white/90 backdrop-blur-md border-b-4 gold-border p-4 sticky top-0 z-50 shadow-md">
+    <header class="bg-white/95 backdrop-blur-md border-b-4 gold-border p-4 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-5">
                 <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Scuola" class="h-16 hidden sm:block">
-                <div class="h-12 w-[2px] bg-slate-100 hidden sm:block"></div>
+                <div class="h-12 w-[2px] bg-stone-100 hidden sm:block"></div>
                 <div>
-                    <h1 class="text-xl font-black tracking-tighter uppercase italic leading-none text-blue-900 serif">Pagine Condivise</h1>
-                    <p class="text-[9px] font-bold text-amber-600 uppercase tracking-[0.2em] mt-1">I.I.S.S. "Vincenzo Lilla"</p>
+                    <h1 class="text-xl font-black tracking-tighter uppercase italic leading-none text-[#73563d] serif">Pagine Condivise</h1>
+                    <p class="text-[9px] font-bold text-[#a38a75] uppercase tracking-[0.2em] mt-1">I.I.S.S. "Vincenzo Lilla"</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <div class="hidden md:block text-right pr-4 border-r border-slate-100">
-                    <p id="user-display" class="text-[10px] font-black text-slate-600 uppercase italic">Accesso in corso...</p>
+                <div class="hidden md:block text-right pr-4 border-r border-stone-100">
+                    <p id="user-display" class="text-[10px] font-black text-stone-600 uppercase italic">Accesso in corso...</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button id="profile-btn" onclick="openProfileModal()" title="Profilo" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-50 border border-slate-100 text-slate-600 hover:bg-slate-100">
+                    <button id="profile-btn" onclick="openProfileModal()" title="Profilo" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-full bg-stone-50 border border-stone-100 text-stone-600 hover:bg-stone-100">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         <span class="text-[11px] font-black uppercase tracking-wider">Profilo</span>
                     </button>
@@ -122,19 +122,19 @@
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-16">
             <div class="animate-card">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-12 h-1.5 bg-amber-500 rounded-full"></div>
-                    <span class="text-amber-600 font-black uppercase text-[10px] tracking-[0.3em]">Biblioteca Scolastica</span>
+                    <div class="w-12 h-1.5 bg-[#c5ab8e] rounded-full"></div>
+                    <span class="text-[#a38a75] font-black uppercase text-[10px] tracking-[0.3em]">Biblioteca Scolastica</span>
                 </div>
-                <h2 id="view-title" class="text-5xl font-black tracking-tighter uppercase italic text-blue-900 serif mb-4">Catalogo Libri</h2>
-                <p class="text-slate-400 text-xs font-medium max-w-md">Sistema di scambio e condivisione per gli studenti del Liceo Classico "Vincenzo Lilla".</p>
+                <h2 id="view-title" class="text-5xl font-black tracking-tighter uppercase italic text-[#73563d] serif mb-4">Catalogo Libri</h2>
+                <p class="text-stone-400 text-xs font-medium max-w-md">Sistema di scambio e condivisione per gli studenti del Liceo Classico "Vincenzo Lilla".</p>
             </div>
             
-            <div class="flex flex-wrap gap-3 w-full lg:w-auto bg-slate-50 p-2 rounded-[2rem] border border-slate-100 shadow-inner items-center">
-                <button onclick="switchView('catalog')" id="btn-catalog" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900">Catalogo</button>
-                <button onclick="switchView('my-books')" id="btn-my-books" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-blue-900">I miei prestiti</button>
-                <button onclick="switchView('history')" id="btn-history" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-blue-900">Movimenti</button>
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto bg-stone-50 p-2 rounded-[2rem] border border-stone-100 shadow-inner items-center">
+                <button onclick="switchView('catalog')" id="btn-catalog" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]">Catalogo</button>
+                <button onclick="switchView('my-books')" id="btn-my-books" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-stone-400 hover:text-[#73563d]">I miei prestiti</button>
+                <button onclick="switchView('history')" id="btn-history" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-stone-400 hover:text-[#73563d]">Movimenti</button>
                 <div id="header-search" class="flex-1 min-w-[200px]">
-                    <input id="search-input" oninput="onSearchInput()" placeholder="Cerca nel fondo comune..." class="w-full bg-white border border-slate-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-amber-200" />
+                    <input id="search-input" oninput="onSearchInput()" placeholder="Cerca nel fondo comune..." class="w-full bg-white border border-stone-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-[#ebdccb]" />
                 </div>
                 <button onclick="openModal('dona')" class="gradient-bg text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:brightness-110 transition-all active:scale-95 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -144,52 +144,52 @@
         </div>
 
         <div id="books-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 pb-32">
-            </div>
+        </div>
 
         <div id="history-container" class="hidden pb-32">
-            <div class="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden p-6">
+            <div class="bg-white rounded-[3rem] shadow-sm border border-stone-100 overflow-hidden p-6">
                 <div class="flex items-center justify-between gap-4 mb-4">
                     <div class="flex-1">
-                        <input id="history-search" oninput="onHistorySearchInput()" placeholder="Cerca movimenti per titolo..." class="w-full bg-slate-50 border border-slate-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-amber-200" />
+                        <input id="history-search" oninput="onHistorySearchInput()" placeholder="Cerca movimenti per titolo..." class="w-full bg-stone-50 border border-stone-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-[#ebdccb]" />
                     </div>
-                    <div class="text-sm text-slate-400 italic font-bold">Filtra per titolo movimento</div>
+                    <div class="text-sm text-stone-400 italic font-bold">Filtra per titolo movimento</div>
                 </div>
                 <div class="overflow-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b border-slate-100">
+                        <thead class="bg-stone-50 border-b border-stone-100">
                             <tr>
-                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Data e Ora</th>
-                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Studente</th>
-                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Azione</th>
-                                <th class="p-6 text-[10px] font-black uppercase text-slate-400 tracking-widest">Dettagli Operazione</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Data e Ora</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Studente</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Azione</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Dettagli Operazione</th>
                             </tr>
                         </thead>
                         <tbody id="history-body" class="text-sm font-medium">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="modal" class="fixed inset-0 bg-blue-900/40 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
+    <div id="modal" class="fixed inset-0 bg-[#73563d]/40 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl p-10 relative overflow-hidden transition-all transform scale-95 opacity-0 border-t-8 gold-border" id="modal-container" style="max-height:92vh; overflow:auto;">
             <div class="mb-8">
-                <h3 id="modal-title" class="font-black uppercase text-2xl tracking-tighter italic text-blue-900 serif">Dona un libro</h3>
-                <p class="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-widest">Inserisci i dati nel registro scolastico</p>
+                <h3 id="modal-title" class="font-black uppercase text-2xl tracking-tighter italic text-[#73563d] serif">Dona un libro</h3>
+                <p class="text-[9px] font-bold text-stone-400 uppercase mt-1 tracking-widest">Inserisci i dati nel registro scolastico</p>
             </div>
             
             <div class="space-y-6">
                 <div>
-                    <label class="text-[9px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-widest">Titolo dell'opera</label>
-                    <input id="book-title" class="w-full bg-slate-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-amber-500 focus:bg-white transition-all text-sm" placeholder="es. I Promessi Sposi">
+                    <label class="text-[9px] font-black uppercase text-stone-400 ml-2 mb-2 block tracking-widest">Titolo dell'opera</label>
+                    <input id="book-title" class="w-full bg-stone-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-[#c5ab8e] focus:bg-white transition-all text-sm" placeholder="es. I Promessi Sposi">
                 </div>
                 <div>
-                    <label class="text-[9px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-widest">Autore / Curatore</label>
-                    <input id="book-author" class="w-full bg-slate-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-amber-500 focus:bg-white transition-all text-sm" placeholder="es. Alessandro Manzoni">
+                    <label class="text-[9px] font-black uppercase text-stone-400 ml-2 mb-2 block tracking-widest">Autore / Curatore</label>
+                    <input id="book-author" class="w-full bg-stone-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-[#c5ab8e] focus:bg-white transition-all text-sm" placeholder="es. Alessandro Manzoni">
                 </div>
                 <div class="flex gap-4 pt-6">
-                    <button onclick="closeModal()" class="flex-1 py-5 font-black text-slate-400 uppercase text-[10px] tracking-widest hover:text-slate-600 transition-colors">Annulla</button>
+                    <button onclick="closeModal()" class="flex-1 py-5 font-black text-stone-400 uppercase text-[10px] tracking-widest hover:text-stone-600 transition-colors">Annulla</button>
                     <button id="submit-btn" onclick="submitBook()" class="flex-1 py-5 gradient-bg text-white font-black rounded-2xl shadow-xl uppercase text-[10px] tracking-widest hover:brightness-110 transition-all">Conferma Registrazione</button>
                 </div>
             </div>
@@ -199,58 +199,58 @@
     <div id="profile-modal" class="fixed inset-0 bg-black/35 z-[110] hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-6 relative overflow-hidden transition-all transform scale-95 opacity-0 border-t-4 gold-border" style="max-height:90vh; overflow:auto;" id="profile-container">
             <div class="mb-4">
-                <h3 class="font-black uppercase text-lg tracking-tighter italic text-blue-900 serif">Il mio Profilo</h3>
-                <p class="text-[9px] text-slate-400 uppercase mt-1 tracking-widest">Modifica i tuoi dati (salvati localmente all'account)</p>
+                <h3 class="font-black uppercase text-lg tracking-tighter italic text-[#73563d] serif">Il mio Profilo</h3>
+                <p class="text-[9px] text-stone-400 uppercase mt-1 tracking-widest">Modifica i tuoi dati (salvati localmente all'account)</p>
             </div>
 
             <div class="space-y-4 text-sm">
                 <div>
-    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Tipo di Utente</label>
-    <select id="profile-type" onchange="toggleUserTypeFields()" class="w-full bg-slate-50 border rounded-xl p-3 font-bold text-sm text-blue-900 outline-none focus:border-amber-500">
-        <option value="interno">Studente / Personale della Scuola</option>
-        <option value="esterno">Utente Esterno alla Scuola</option>
-    </select>
-</div>
-                <div>
-                    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Nome</label>
-                    <input id="profile-name" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="Nome">
+                    <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Tipo di Utente</label>
+                    <select id="profile-type" onchange="toggleUserTypeFields()" class="w-full bg-stone-50 border rounded-xl p-3 font-bold text-sm text-[#73563d] outline-none focus:border-[#c5ab8e]">
+                        <option value="interno">Studente / Personale della Scuola</option>
+                        <option value="esterno">Utente Esterno alla Scuola</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Cognome</label>
-                    <input id="profile-surname" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="Cognome">
+                    <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Nome</label>
+                    <input id="profile-name" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="Nome">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Cognome</label>
+                    <input id="profile-surname" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="Cognome">
                 </div>
                 <div id="wrapper-interno" class="space-y-4">
-    <div class="flex gap-3">
-        <div class="flex-1">
-            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Classe</label>
-            <input id="profile-class" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 3">
-        </div>
-        <div class="flex-1">
-            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Sezione</label>
-            <input id="profile-section" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. A">
-        </div>
-    </div>
-    <div>
-        <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Anno scolastico</label>
-        <input id="profile-year" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 2025/2026">
-    </div>
-</div>
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Classe</label>
+                            <input id="profile-class" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. 3">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Sezione</label>
+                            <input id="profile-section" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. A">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Anno scolastico</label>
+                        <input id="profile-year" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. 2025/2026">
+                    </div>
+                </div>
                 <div id="wrapper-esterno" class="space-y-4 hidden">
-    <div class="flex gap-3">
-        <div class="flex-1">
-            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Età</label>
-            <input id="profile-age" type="number" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 24">
-        </div>
-        <div class="flex-1">
-            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Provenienza / Città</label>
-            <input id="profile-provenance" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. Francavilla Fontana">
-        </div>
-    </div>
-</div>
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Età</label>
+                            <input id="profile-age" type="number" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. 24">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Provenienza / Città</label>
+                            <input id="profile-provenance" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. Francavilla Fontana">
+                        </div>
+                    </div>
+                </div>
 
                 <div class="flex gap-3 pt-4">
-                    <button onclick="closeProfileModal()" class="flex-1 py-3 font-black text-slate-500 uppercase text-[10px] tracking-widest hover:text-slate-700 transition-colors">Annulla</button>
-                    <button id="save-profile-btn" onclick="saveProfile()" class="flex-1 py-3 bg-blue-900 text-white font-black rounded-xl uppercase text-[10px] tracking-widest hover:brightness-110">Salva</button>
+                    <button onclick="closeProfileModal()" class="flex-1 py-3 font-black text-stone-500 uppercase text-[10px] tracking-widest hover:text-stone-700 transition-colors">Annulla</button>
+                    <button id="save-profile-btn" onclick="saveProfile()" class="flex-1 py-3 bg-[#73563d] text-white font-black rounded-xl uppercase text-[10px] tracking-widest hover:brightness-110">Salva</button>
                 </div>
             </div>
         </div>
@@ -274,12 +274,12 @@
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
-await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
-    options: { 
-        redirectTo: window.location.origin + window.location.pathname 
-    }
-});
+                    await supabaseClient.auth.signInWithOAuth({
+                        provider: 'google',
+                        options: { 
+                            redirectTo: window.location.origin + window.location.pathname 
+                        }
+                    });
                     return;
                 }
 
@@ -529,15 +529,15 @@ await supabaseClient.auth.signInWithOAuth({
                         try {
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                             const { data, error } = await localClient.from('profiles').upsert({
-    email: currentUserEmail,
-    name: payload.name,
-    surname: payload.surname,
-    class: payload.class || null,
-    section: payload.section || null,
-    year: payload.year || null,
-    age: payload.age || null,
-    provenance: payload.provenance || null
-});
+                                email: currentUserEmail,
+                                name: payload.name,
+                                surname: payload.surname,
+                                class: payload.class || null,
+                                section: payload.section || null,
+                                year: payload.year || null,
+                                age: payload.age || null,
+                                provenance: payload.provenance || null
+                            });
                             if (error) throw error;
                             if (this.successCallback) this.successCallback(data);
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
@@ -546,12 +546,12 @@ await supabaseClient.auth.signInWithOAuth({
             }
         };
 
-// VARIABILI GLOBALI PER I DATI (Lasciale così come sono)
+        // VARIABILI GLOBALI PER I DATI (Lasciale così come sono)
         let allBooks = [];
         let allMovements = [];
         let currentExchangeBookId = null; 
 
-       // QUESTA È L'UNICA FUNZIONE initApp() CHE DEVE RIMANERE
+        // QUESTA È L'UNICA FUNZIONE initApp() CHE DEVE RIMANERE
         function initApp() {
             window.google.script.run.withSuccessHandler(function(data) {
                 allBooks = data.books || [];
@@ -589,20 +589,21 @@ await supabaseClient.auth.signInWithOAuth({
         }
 
         function toggleUserTypeFields() {
-    const type = document.getElementById('profile-type').value;
-    const internoWrapper = document.getElementById('wrapper-interno');
-    const esternoWrapper = document.getElementById('wrapper-esterno');
-    
-    if (type === 'esterno') {
-        // Se l'utente è esterno, nascondiamo classe/anno e mostriamo età/provenienza
-        if (internoWrapper) internoWrapper.classList.add('hidden');
-        if (esternoWrapper) esternoWrapper.classList.remove('hidden');
-    } else {
-        // Se l'utente è interno, facciamo l'esatto contrario
-        if (internoWrapper) internoWrapper.classList.remove('hidden');
-        if (esternoWrapper) esternoWrapper.classList.add('hidden');
-    }
-}
+            const type = document.getElementById('profile-type').value;
+            const internoWrapper = document.getElementById('wrapper-interno');
+            const esternoWrapper = document.getElementById('wrapper-esterno');
+            
+            if (type === 'esterno') {
+                // Se l'utente è esterno, nascondiamo classe/anno e mostriamo età/provenienza
+                if (internoWrapper) internoWrapper.classList.add('hidden');
+                if (esternoWrapper) esternoWrapper.classList.remove('hidden');
+            } else {
+                // Se l'utente è interno, facciamo l'esatto contrario
+                if (internoWrapper) internoWrapper.classList.remove('hidden');
+                if (esternoWrapper) esternoWrapper.classList.add('hidden');
+            }
+        }
+
         // Genera visivamente le schede dei libri nel catalogo dinamico
         function renderBooks(booksList) {
             const grid = document.getElementById('books-grid');
@@ -613,7 +614,7 @@ await supabaseClient.auth.signInWithOAuth({
             const validBooks = booksList.filter(b => b.status !== 'scambiato');
 
             if (validBooks.length === 0) {
-                grid.innerHTML = `<p class="text-slate-400 text-sm italic col-span-full text-center py-10">Nessun libro trovato.</p>`;
+                grid.innerHTML = `<p class="text-stone-400 text-sm italic col-span-full text-center py-10">Nessun libro trovato.</p>`;
                 return;
             }
 
@@ -625,26 +626,26 @@ await supabaseClient.auth.signInWithOAuth({
                 if (isDisponibile) {
                     actionButton = `
                         <div class="flex flex-col gap-2 mt-4">
-                            <button onclick="borrowBook('${book.id}')" class="w-full bg-blue-900 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Prendi in Prestito</button>
-                            <button onclick="openExchangeModal('${book.id}')" class="w-full bg-amber-600 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Scambia Libro</button>
+                            <button onclick="borrowBook('${book.id}')" class="w-full bg-[#73563d] text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Prendi in Prestito</button>
+                            <button onclick="openExchangeModal('${book.id}')" class="w-full bg-[#a38a75] text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Scambia Libro</button>
                         </div>
                     `;
                 } else if (book.currentHolder === currentUserEmail) {
-                    actionButton = `<button onclick="returnBook('${book.id}')" class="w-full mt-4 bg-slate-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>`;
+                    actionButton = `<button onclick="returnBook('${book.id}')" class="w-full mt-4 bg-stone-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>`;
                 } else {
-                    actionButton = `<button disabled class="w-full mt-4 bg-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-wider py-3 rounded-xl border border-slate-200 cursor-not-allowed">In prestito a un collega</button>`;
+                    actionButton = `<button disabled class="w-full mt-4 bg-stone-100 text-stone-400 font-black text-[10px] uppercase tracking-wider py-3 rounded-xl border border-stone-200 cursor-not-allowed">In prestito a un collega</button>`;
                 }
 
                 grid.innerHTML += `
-                    <div class="bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm book-card animate-card">
+                    <div class="bg-white rounded-[2rem] border border-stone-100 p-6 shadow-sm book-card animate-card">
                         <div class="flex justify-between items-start gap-4 mb-4">
                             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${badgeColor}">${book.status}</span>
-                            <span class="text-[10px] text-slate-400 font-bold">${book.date}</span>
+                            <span class="text-[10px] text-stone-400 font-bold">${book.date}</span>
                         </div>
-                        <h4 class="font-black text-xl text-blue-900 tracking-tight leading-tight mb-1 serif">${book.title}</h4>
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wide mb-4">${book.author}</p>
-                        <div class="pt-4 border-t border-slate-50 text-[11px] text-slate-400">
-                            <span class="font-medium">Donato da:</span> <span class="font-bold text-slate-600">${book.donor}</span>
+                        <h4 class="font-black text-xl text-[#73563d] tracking-tight leading-tight mb-1 serif">${book.title}</h4>
+                        <p class="text-stone-500 text-xs font-bold uppercase tracking-wide mb-4">${book.author}</p>
+                        <div class="pt-4 border-t border-stone-50 text-[11px] text-stone-400">
+                            <span class="font-medium">Donato da:</span> <span class="font-bold text-stone-600">${book.donor}</span>
                         </div>
                         ${actionButton}
                     </div>
@@ -659,17 +660,17 @@ await supabaseClient.auth.signInWithOAuth({
             body.innerHTML = "";
 
             if (movementsList.length === 0) {
-                body.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">Nessun movimento registrato.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-stone-400 italic">Nessun movimento registrato.</td></tr>`;
                 return;
             }
 
             movementsList.forEach(m => {
                 body.innerHTML += `
-                    <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors history-row">
-                        <td class="p-6 text-slate-500 font-medium">${m.timestamp}</td>
-                        <td class="p-6 font-bold text-slate-800">${m.utente} <span class="block text-[10px] font-medium text-slate-400">${m.user_email}</span></td>
-                        <td class="p-6"><span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide bg-slate-100 text-slate-700">${m.azione}</span></td>
-                        <td class="p-6 text-slate-600 font-medium italic">${m.titolo}</td>
+                    <tr class="border-b border-stone-50 hover:bg-stone-50/50 transition-colors history-row">
+                        <td class="p-6 text-stone-500 font-medium">${m.timestamp}</td>
+                        <td class="p-6 font-bold text-stone-800">${m.utente} <span class="block text-[10px] font-medium text-stone-400">${m.user_email}</span></td>
+                        <td class="p-6"><span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide bg-stone-100 text-stone-700">${m.azione}</span></td>
+                        <td class="p-6 text-stone-600 font-medium italic">${m.titolo}</td>
                     </tr>
                 `;
             });
@@ -686,11 +687,11 @@ await supabaseClient.auth.signInWithOAuth({
             const title = document.getElementById('view-title');
 
             [catalogBtn, myBooksBtn, historyBtn].forEach(b => {
-                if(b) b.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-slate-400 hover:text-blue-900";
+                if(b) b.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-stone-400 hover:text-[#73563d]";
             });
 
             if (view === 'catalog') {
-                if(catalogBtn) catalogBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
+                if(catalogBtn) catalogBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]";
                 if(grid) grid.classList.remove('hidden');
                 if(history) history.classList.add('hidden');
                 if(searchBar) searchBar.classList.remove('hidden');
@@ -699,7 +700,7 @@ await supabaseClient.auth.signInWithOAuth({
                 const availableBooks = allBooks.filter(b => b.status === 'disponibile');
                 renderBooks(availableBooks);
             } else if (view === 'my-books') {
-                if(myBooksBtn) myBooksBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
+                if(myBooksBtn) myBooksBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]";
                 if(grid) grid.classList.remove('hidden');
                 if(history) history.classList.add('hidden');
                 if(searchBar) searchBar.classList.add('hidden');
@@ -708,7 +709,7 @@ await supabaseClient.auth.signInWithOAuth({
                 const myBooks = allBooks.filter(b => b.currentHolder === currentUserEmail);
                 renderBooks(myBooks);
             } else if (view === 'history') {
-                if(historyBtn) historyBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-blue-900";
+                if(historyBtn) historyBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]";
                 if(grid) grid.classList.add('hidden');
                 if(history) history.classList.remove('hidden');
                 if(searchBar) searchBar.className = "hidden";
@@ -720,7 +721,7 @@ await supabaseClient.auth.signInWithOAuth({
         // Filtro di ricerca real-time nel fondo comune
         function onSearchInput() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
-            const currentTab = document.getElementById('btn-catalog').classList.contains('text-blue-900') ? 'catalog' : 'my-books';
+            const currentTab = document.getElementById('btn-catalog').classList.contains('text-[#73563d]') ? 'catalog' : 'my-books';
             
             // Applica il filtro della scheda corrente prima della ricerca testuale
             let baseBooks = currentTab === 'catalog' ? allBooks.filter(b => b.status === 'disponibile') : allBooks.filter(b => b.currentHolder === currentUserEmail);
@@ -733,6 +734,7 @@ await supabaseClient.auth.signInWithOAuth({
             renderBooks(filtered);
         }
 
+        // Filtro nello storico
         function onHistorySearchInput() {
             const query = document.getElementById('history-search').value.toLowerCase().trim();
             const filtered = allMovements.filter(m => 
@@ -759,7 +761,7 @@ await supabaseClient.auth.signInWithOAuth({
             }).returnBook(bookId);
         }
 
-        // Gestione finestre Modali (Adattata per supportare sia inserimento da zero che Scambio)
+        // Gestione finestre Modali
         function openModal(mode) {
             currentExchangeBookId = null; // Reset
             const modal = document.getElementById('modal');
@@ -812,20 +814,14 @@ await supabaseClient.auth.signInWithOAuth({
             }
         }
 
-        // Apre il modale del profilo (con blocco se isForced è vero)
+        // Apre il modale del profilo
         function openProfileModal(isForced = false) {
             const modal = document.getElementById('profile-modal');
             const container = document.getElementById('profile-container');
-            
-            // Cerca il bottone di chiusura (la X o il tasto annulla) all'interno del modale
-            // NOTA: Se hai un'icona di chiusura in alto a destra con un id tipo 'close-profile-btn', usiamo quello.
-            // Altrimenti, cerchiamo il primo bottone di chiusura generico.
             const closeBtn = document.getElementById('close-profile-btn') || modal.querySelector('button[onclick="closeProfileModal()"]');
 
             if (isForced) {
-                // Se è forzato, nascondiamo i pulsanti per chiudere il popup
                 if (closeBtn) closeBtn.classList.add('hidden');
-                // Impedisce la chiusura accidentale cliccando sullo sfondo scuro
                 modal.onclick = function(e) { if(e.target === modal) return false; };
             } else {
                 if (closeBtn) closeBtn.classList.remove('hidden');
@@ -839,21 +835,21 @@ await supabaseClient.auth.signInWithOAuth({
                 
                 window.google.script.run.withSuccessHandler(function(profile) {
                     if(profile) {
-    document.getElementById('profile-name').value = profile.name || '';
-    document.getElementById('profile-surname').value = profile.surname || '';
-    
-    if (profile.provenance) {
-        document.getElementById('profile-type').value = 'esterno';
-        document.getElementById('profile-age').value = profile.age || '';
-        document.getElementById('profile-provenance').value = profile.provenance || '';
-    } else {
-        document.getElementById('profile-type').value = 'interno';
-        document.getElementById('profile-class').value = profile.class || '';
-        document.getElementById('profile-section').value = profile.section || '';
-        document.getElementById('profile-year').value = profile.year || '';
-    }
-    toggleUserTypeFields();
-}
+                        document.getElementById('profile-name').value = profile.name || '';
+                        document.getElementById('profile-surname').value = profile.surname || '';
+                        
+                        if (profile.provenance) {
+                            document.getElementById('profile-type').value = 'esterno';
+                            document.getElementById('profile-age').value = profile.age || '';
+                            document.getElementById('profile-provenance').value = profile.provenance || '';
+                        } else {
+                            document.getElementById('profile-type').value = 'interno';
+                            document.getElementById('profile-class').value = profile.class || '';
+                            document.getElementById('profile-section').value = profile.section || '';
+                            document.getElementById('profile-year').value = profile.year || '';
+                        }
+                        toggleUserTypeFields();
+                    }
                 }).getProfile();
             }
         }
@@ -867,61 +863,61 @@ await supabaseClient.auth.signInWithOAuth({
             }
         }
 
-       function saveProfile() {
-    const userType = document.getElementById('profile-type').value;
-    const nameVal = document.getElementById('profile-name').value.trim();
-    const surnameVal = document.getElementById('profile-surname').value.trim();
+        function saveProfile() {
+            const userType = document.getElementById('profile-type').value;
+            const nameVal = document.getElementById('profile-name').value.trim();
+            const surnameVal = document.getElementById('profile-surname').value.trim();
 
-    if (!nameVal || !surnameVal) {
-        alert("Nome e Cognome sono campi obbligatori!");
-        return;
-    }
+            if (!nameVal || !surnameVal) {
+                alert("Nome e Cognome sono campi obbligatori!");
+                return;
+            }
 
-    let payload = { name: nameVal, surname: surnameVal };
+            let payload = { name: nameVal, surname: surnameVal };
 
-    if (userType === 'interno') {
-        const classVal = document.getElementById('profile-class').value.trim();
-        const sectionVal = document.getElementById('profile-section').value.trim();
-        const yearVal = document.getElementById('profile-year').value.trim();
+            if (userType === 'interno') {
+                const classVal = document.getElementById('profile-class').value.trim();
+                const sectionVal = document.getElementById('profile-section').value.trim();
+                const yearVal = document.getElementById('profile-year').value.trim();
 
-        if (!classVal || !yearVal) {
-            alert("I campi Classe e Anno Scolastico sono obbligatori per gli studenti!");
-            return;
+                if (!classVal || !yearVal) {
+                    alert("I campi Classe e Anno Scolastico sono obbligatori per gli studenti!");
+                    return;
+                }
+                payload.class = classVal;
+                payload.section = sectionVal;
+                payload.year = yearVal;
+            } else {
+                const ageVal = document.getElementById('profile-age').value.trim();
+                const provenanceVal = document.getElementById('profile-provenance').value.trim();
+
+                if (!provenanceVal) {
+                    alert("Il campo Provenienza è obbligatorio per gli utenti esterni!");
+                    return;
+                }
+                payload.age = ageVal ? parseInt(ageVal) : null;
+                payload.provenance = provenanceVal;
+            }
+
+            window.google.script.run.withSuccessHandler(function() {
+                let currentUserFullName = userType === 'interno' ? 
+                    `${payload.name} ${payload.surname} (${payload.class}${payload.section || ''})` : 
+                    `${payload.name} ${payload.surname} (Esterno)`;
+
+                if (document.getElementById('user-display')) {
+                    document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+                }
+                
+                const avatar = document.getElementById('avatar');
+                if (avatar && payload.name) {
+                    avatar.innerText = payload.name.charAt(0).toUpperCase();
+                }
+                
+                closeProfileModal();
+                alert("Profilo aggiornato con successo!");
+                initApp(); 
+            }).saveProfile(payload);
         }
-        payload.class = classVal;
-        payload.section = sectionVal;
-        payload.year = yearVal;
-    } else {
-        const ageVal = document.getElementById('profile-age').value.trim();
-        const provenanceVal = document.getElementById('profile-provenance').value.trim();
-
-        if (!provenanceVal) {
-            alert("Il campo Provenienza è obbligatorio per gli utenti esterni!");
-            return;
-        }
-        payload.age = ageVal ? parseInt(ageVal) : null;
-        payload.provenance = provenanceVal;
-    }
-
-    window.google.script.run.withSuccessHandler(function() {
-        let currentUserFullName = userType === 'interno' ? 
-            `${payload.name} ${payload.surname} (${payload.class}${payload.section || ''})` : 
-            `${payload.name} ${payload.surname} (Esterno)`;
-
-        if (document.getElementById('user-display')) {
-            document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
-        }
-        
-        const avatar = document.getElementById('avatar');
-        if (avatar && payload.name) {
-            avatar.innerText = payload.name.charAt(0).toUpperCase();
-        }
-        
-        closeProfileModal();
-        alert("Profilo aggiornato con successo!");
-        initApp(); 
-    }).saveProfile(payload);
-}
 
         // Gestisce l'invio e dirotterà l'azione a seconda della modalità (Inserimento o Scambio)
         function submitBook() {
@@ -961,6 +957,6 @@ await supabaseClient.auth.signInWithOAuth({
         }
     </script>
 
-    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-slate-400 select-none">Progettato da Giovanni Rochira</footer>
+    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-stone-400 select-none">Progettato da Giovanni Rochira</footer>
 </body>
 </html>
