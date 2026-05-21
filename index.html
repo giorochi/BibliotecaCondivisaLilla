@@ -17,67 +17,72 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         /* Base fonts + smoothing */
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
         .serif { font-family: 'Playfair Display', serif; }
 
-        /* Cards */
-        .book-card { transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1); -webkit-tap-highlight-color: transparent; }
-        .book-card:hover { transform: translateY(-8px); box-shadow: 0 14px 20px -6px rgba(115,86,61,0.08), 0 6px 8px -6px rgba(115,86,61,0.06); }
+        /* Cards and animations */
+        .book-card { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); -webkit-tap-highlight-color: transparent; }
+        .book-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 16px 24px -8px rgba(115, 86, 61, 0.12), 0 8px 12px -8px rgba(115, 86, 61, 0.08); }
 
         /* Entrance animation */
-        @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-card { animation: slideUp 0.42s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-card { animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* Loader */
-        .loader-spin { border: 3px solid #f3eedf; border-top: 3px solid #73563d; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
+        /* Loader with soft glow pulse */
+        .loader-spin { border: 3.5px solid #f3eedf; border-top: 3.5px solid #73563d; border-radius: 50%; width: 36px; height: 36px; animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Colors based on logo */
-        .gradient-bg { background: linear-gradient(135deg, #73563d 0%, #a38a75 100%); }
-        .gold-border { border-color: #c5ab8e; }
+        /* Color Palettes matched with Logos */
+        .gradient-bg { background: linear-gradient(135deg, #73563d 0%, #a38a75 50%, #c5ab8e 100%); }
+        .gradient-orange { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); }
+        .gold-border { border-color: #ebdccb; }
 
-        /* Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height:6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e3decb; border-radius: 10px; }
+        /* Custom glow effects for cute design */
+        .glow-soft { box-shadow: 0 10px 30px -10px rgba(115, 86, 61, 0.15); }
+        .glow-button { box-shadow: 0 4px 14px 0 rgba(115, 86, 61, 0.25); }
+
+        /* Scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #dcd6c5; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 
         /* Touch-friendly sizes */
-        button, .px-6, .px-8 { min-height: 48px; padding-top: 0.6rem; padding-bottom: 0.6rem; }
+        button, .px-6, .px-8 { min-height: 48px; }
         .rounded-2xl { touch-action: manipulation; }
 
         /* Modal adjustments for mobile */
         #modal { padding: 1rem; }
-        #modal-container { max-height: 92vh; overflow:auto; border-radius: 2rem; transition: transform .18s ease, opacity .18s ease; -webkit-overflow-scrolling: touch; }
+        #modal-container { max-height: 90vh; overflow: auto; border-radius: 2.5rem; transition: transform .25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity .2s ease; -webkit-overflow-scrolling: touch; }
 
-        header img { max-height: 56px; }
-        #user-display { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+        header img { max-height: 52px; }
+        #user-display { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
 
         @media (max-width: 640px) {
-            .max-w-7xl { padding-left: 1rem; padding-right: 1rem; }
-            header { padding: 0.75rem 0.75rem; }
-            header img { height:48px; }
-            #view-title { font-size: 2.6rem; line-height:1.02; }
-            button { min-height:48px; font-size: 0.95rem; }
-            main { padding: 1rem; margin-top: 0.75rem; }
-            .grid { gap: 1rem; }
-            #modal-container { max-width: 720px; padding: 1.25rem; max-height: 92vh; }
-            #modal-container::-webkit-scrollbar { width: 6px; }
-            footer { font-size: 11px; bottom:8px; }
+            .max-w-7xl { padding-left: 1.25rem; padding-right: 1.25rem; }
+            header { padding: 0.75rem 0.5rem; }
+            header img { height: 42px; }
+            #view-title { font-size: 2.3rem; line-height: 1.05; }
+            button { min-height: 48px; font-size: 0.95rem; }
+            main { padding: 1rem; margin-top: 0.5rem; }
+            .grid { gap: 1.25rem; }
+            #modal-container { max-width: 100%; padding: 1.5rem; max-height: 88vh; }
+            footer { font-size: 11px; bottom: 8px; }
 
             .flex.flex-wrap.gap-3 > button { flex: 1 1 100%; }
-            #history-container .bg-white { padding: 0.5rem; }
+            #history-container .bg-white { padding: 0.75rem; border-radius: 2rem; }
             #history-container table { display: block; width: 100%; -webkit-overflow-scrolling: touch; }
             #history-container thead { display: none; } 
-            #history-container tbody { display: block; max-height: 56vh; overflow: auto; }
-            #history-container tr.history-row { display: block; margin-bottom: 0.6rem; background: #fff; border-radius: 1rem; padding: 0.6rem 0.8rem; box-shadow: 0 6px 12px rgba(115,86,61,0.04); }
-            #history-container td { display: block; padding: 6px 0; border: none; }
-            #history-container td:first-child { color: #a38a75; font-size: 12px; }
+            #history-container tbody { display: block; max-height: 54vh; overflow: auto; }
+            #history-container tr.history-row { display: block; margin-bottom: 0.8rem; background: #fff; border-radius: 1.25rem; padding: 1rem; box-shadow: 0 4px 12px rgba(115,86,61,0.05); border: 1px solid #f2ede4; }
+            #history-container td { display: block; padding: 4px 0; border: none; }
+            #history-container td:first-child { color: #a38a75; font-size: 11px; font-weight: bold; }
             #history-container td:nth-child(2) { font-weight: 800; color: #403225; }
             #history-container td:nth-child(3) { padding-top: 6px; }
             #history-container td:nth-child(4) { font-style: italic; color: #5a493b; padding-top: 6px; }
-            #history-container td.p-6 { padding: 0.6rem 0; }
+            #history-container td.p-6 { padding: 0.5rem 0; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -85,32 +90,40 @@
         }
     </style>
 </head>
-<body class="bg-[#f9f7f4] text-stone-800 min-h-screen">
+<body class="bg-gradient-to-tr from-[#fdfcf7] via-[#fcfbf6] to-[#f5efe4] text-stone-800 min-h-screen">
 
-    <div id="loader" class="fixed inset-0 bg-[#f9f7f4] z-[200] flex flex-col items-center justify-center transition-opacity duration-500">
-        <div class="flex items-center gap-6 mb-6">
-            <img src="download.jpg" onerror="this.src='https://via.placeholder.com/150?text=Logo+Scuola'" alt="Logo Scuola" class="h-20 w-20 object-contain animate-pulse">
-            <div class="h-16 w-[2px] bg-stone-300"></div>
-            <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Lilla" class="h-20 w-20 object-contain animate-pulse">
+    <!-- Splash Screen Loader -->
+    <div id="loader" class="fixed inset-0 bg-[#fdfcf7] z-[200] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="flex items-center gap-5 mb-8 bg-white p-5 rounded-[2.5rem] shadow-md border border-[#f3eedf]">
+            <img src="https://iisslilla.edu.it/wp-content/uploads/sites/996/lilla.png?x67791" alt="Logo Scuola" class="h-20 w-20 object-contain animate-pulse">
+            <div class="h-14 w-[2px] bg-stone-200"></div>
+            <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Progetto" class="h-20 w-20 object-contain animate-pulse">
         </div>
-        <div class="loader-spin mb-4"></div>
+        <div class="loader-spin mb-6"></div>
         <p class="text-[10px] font-black uppercase tracking-[0.4em] text-[#73563d] italic">Pagine Condivise - Liceo Lilla</p>
     </div>
 
-    <header class="bg-white/95 backdrop-blur-md border-b-4 gold-border p-4 sticky top-0 z-50 shadow-sm">
+    <!-- Header Navigation -->
+    <header class="bg-white/95 backdrop-blur-md border-b-4 gold-border p-4 sticky top-0 z-50 shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <!-- Primo Logo: Logo Scuola -->
-                <img src="download.jpg" onerror="this.src='https://via.placeholder.com/150?text=Logo+Scuola'" alt="Logo Scuola" class="h-16 w-16 object-contain hidden sm:block">
+            <div class="flex items-center gap-3">
+                <!-- Contenitore loghi accoppiati -->
+                <div class="flex items-center gap-3 bg-stone-50/80 p-2 rounded-2xl border border-stone-100 hidden sm:flex shadow-inner">
+                    <!-- Primo Logo: Logo Scuola -->
+                    <img src="https://iisslilla.edu.it/wp-content/uploads/sites/996/lilla.png?x67791" alt="Logo Scuola" class="h-12 w-12 object-contain">
+                    
+                    <!-- Separatore verticale -->
+                    <div class="h-8 w-[1.5px] bg-[#ebdccb]"></div>
+                    
+                    <!-- Secondo Logo: Logo Progetto Pagine Condivise -->
+                    <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Progetto" class="h-12 w-12 object-contain">
+                </div>
                 
-                <!-- Separatore verticale -->
-                <div class="h-12 w-[2px] bg-[#e3decb] hidden sm:block"></div>
-                
-                <!-- Secondo Logo: Logo Progetto Pagine Condivise -->
-                <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Progetto" class="h-16 w-16 object-contain hidden sm:block">
-                
-                <!-- Separatore verticale -->
-                <div class="h-12 w-[2px] bg-[#e3decb] hidden sm:block"></div>
+                <div class="sm:hidden flex items-center gap-2">
+                    <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Progetto" class="h-10 w-10 object-contain">
+                </div>
+
+                <div class="h-10 w-[1px] bg-[#e3decb] hidden sm:block"></div>
                 
                 <div>
                     <h1 class="text-xl font-black tracking-tighter uppercase italic leading-none text-[#73563d] serif">Pagine Condivise</h1>
@@ -118,64 +131,67 @@
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <div class="hidden md:block text-right pr-4 border-r border-stone-100">
+                <div class="hidden md:block text-right pr-4 border-r border-stone-150">
                     <p id="user-display" class="text-[10px] font-black text-stone-600 uppercase italic">Accesso in corso...</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button id="profile-btn" onclick="openProfileModal()" title="Profilo" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-full bg-stone-50 border border-stone-100 text-stone-600 hover:bg-stone-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <button id="profile-btn" onclick="openProfileModal()" title="Profilo" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-stone-50 border border-stone-100 text-stone-600 hover:bg-[#73563d]/5 hover:text-[#73563d] transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#73563d]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         <span class="text-[11px] font-black uppercase tracking-wider">Profilo</span>
                     </button>
-                    <div id="avatar" onclick="openProfileModal()" role="button" aria-label="Apri profilo" class="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center font-bold text-white text-lg shadow-lg border-2 border-white cursor-pointer">?</div>
+                    <div id="avatar" onclick="openProfileModal()" role="button" aria-label="Apri profilo" class="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center font-bold text-white text-lg shadow-lg border-2 border-white cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200">?</div>
                 </div>
             </div>
         </div>
     </header>
 
+    <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto p-6 mt-10">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 mb-16">
             <div class="animate-card">
                 <div class="flex items-center gap-3 mb-3">
-                    <div class="w-12 h-1.5 bg-[#c5ab8e] rounded-full"></div>
+                    <div class="w-12 h-1.5 bg-[#e67e22] rounded-full"></div>
                     <span class="text-[#a38a75] font-black uppercase text-[10px] tracking-[0.3em]">Biblioteca Scolastica</span>
                 </div>
                 <h2 id="view-title" class="text-5xl font-black tracking-tighter uppercase italic text-[#73563d] serif mb-4">Catalogo Libri</h2>
-                <p class="text-stone-400 text-xs font-medium max-w-md">Sistema di scambio e condivisione per gli studenti del Liceo Classico "Vincenzo Lilla".</p>
+                <p class="text-stone-500 text-xs font-medium max-w-md">Sistema di scambio e condivisione per gli studenti del Liceo Classico "Vincenzo Lilla".</p>
             </div>
             
-            <div class="flex flex-wrap gap-3 w-full lg:w-auto bg-stone-50 p-2 rounded-[2rem] border border-stone-100 shadow-inner items-center">
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto bg-stone-50 p-2 rounded-[2rem] border border-stone-150 shadow-inner items-center">
                 <button onclick="switchView('catalog')" id="btn-catalog" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]">Catalogo</button>
                 <button onclick="switchView('my-books')" id="btn-my-books" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-stone-400 hover:text-[#73563d]">I miei prestiti</button>
                 <button onclick="switchView('history')" id="btn-history" class="px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all text-stone-400 hover:text-[#73563d]">Movimenti</button>
                 <div id="header-search" class="flex-1 min-w-[200px]">
-                    <input id="search-input" oninput="onSearchInput()" placeholder="Cerca nel fondo comune..." class="w-full bg-white border border-stone-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-[#ebdccb]" />
+                    <input id="search-input" oninput="onSearchInput()" placeholder="Cerca nel fondo comune..." class="w-full bg-white border border-stone-150 rounded-full px-5 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-[#c5ab8e] transition-all" />
                 </div>
-                <button onclick="openModal('dona')" class="gradient-bg text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:brightness-110 transition-all active:scale-95 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <button onclick="openModal('dona')" class="gradient-bg text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Aggiungi
                 </button>
             </div>
         </div>
 
+        <!-- Dynamic Books Grid -->
         <div id="books-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 pb-32">
         </div>
 
+        <!-- Movements History View -->
         <div id="history-container" class="hidden pb-32">
-            <div class="bg-white rounded-[3rem] shadow-sm border border-stone-100 overflow-hidden p-6">
-                <div class="flex items-center justify-between gap-4 mb-4">
+            <div class="bg-white rounded-[3rem] shadow-sm border border-stone-100 overflow-hidden p-6 glow-soft">
+                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-6">
                     <div class="flex-1">
-                        <input id="history-search" oninput="onHistorySearchInput()" placeholder="Cerca movimenti per titolo..." class="w-full bg-stone-50 border border-stone-100 rounded-full px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-[#ebdccb]" />
+                        <input id="history-search" oninput="onHistorySearchInput()" placeholder="Cerca movimenti per titolo..." class="w-full bg-stone-50 border border-stone-100 rounded-full px-5 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-[#c5ab8e] transition-all" />
                     </div>
-                    <div class="text-sm text-stone-400 italic font-bold">Filtra per titolo movimento</div>
+                    <div class="text-xs text-[#a38a75] italic font-black uppercase tracking-wider pl-2">Filtro automatico registro</div>
                 </div>
-                <div class="overflow-auto">
+                <div class="overflow-auto custom-scrollbar">
                     <table class="w-full text-left">
-                        <thead class="bg-stone-50 border-b border-stone-100">
+                        <thead class="bg-stone-50/80 border-b border-stone-100 rounded-2xl">
                             <tr>
-                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Data e Ora</th>
-                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Studente</th>
-                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Azione</th>
-                                <th class="p-6 text-[10px] font-black uppercase text-stone-400 tracking-widest">Dettagli Operazione</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-[#a38a75] tracking-widest">Data e Ora</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-[#a38a75] tracking-widest">Studente</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-[#a38a75] tracking-widest">Azione</th>
+                                <th class="p-6 text-[10px] font-black uppercase text-[#a38a75] tracking-widest">Dettagli Operazione</th>
                             </tr>
                         </thead>
                         <tbody id="history-body" class="text-sm font-medium">
@@ -186,6 +202,7 @@
         </div>
     </main>
 
+    <!-- Donation & Swap Modal -->
     <div id="modal" class="fixed inset-0 bg-[#73563d]/40 backdrop-blur-md z-[100] hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl p-10 relative overflow-hidden transition-all transform scale-95 opacity-0 border-t-8 gold-border" id="modal-container" style="max-height:92vh; overflow:auto;">
             <div class="mb-8">
@@ -196,23 +213,24 @@
             <div class="space-y-6">
                 <div>
                     <label class="text-[9px] font-black uppercase text-stone-400 ml-2 mb-2 block tracking-widest">Titolo dell'opera</label>
-                    <input id="book-title" class="w-full bg-stone-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-[#c5ab8e] focus:bg-white transition-all text-sm" placeholder="es. I Promessi Sposi">
+                    <input id="book-title" class="w-full bg-[#fdfbf8] border-2 border-stone-100 rounded-2xl p-5 font-bold outline-none focus:border-[#73563d] focus:bg-white transition-all text-sm" placeholder="es. I Promessi Sposi">
                 </div>
                 <div>
                     <label class="text-[9px] font-black uppercase text-stone-400 ml-2 mb-2 block tracking-widest">Autore / Curatore</label>
-                    <input id="book-author" class="w-full bg-stone-50 border-2 border-transparent rounded-2xl p-5 font-bold outline-none focus:border-[#c5ab8e] focus:bg-white transition-all text-sm" placeholder="es. Alessandro Manzoni">
+                    <input id="book-author" class="w-full bg-[#fdfbf8] border-2 border-stone-100 rounded-2xl p-5 font-bold outline-none focus:border-[#73563d] focus:bg-white transition-all text-sm" placeholder="es. Alessandro Manzoni">
                 </div>
                 <div class="flex gap-4 pt-6">
                     <button onclick="closeModal()" class="flex-1 py-5 font-black text-stone-400 uppercase text-[10px] tracking-widest hover:text-stone-600 transition-colors">Annulla</button>
-                    <button id="submit-btn" onclick="submitBook()" class="flex-1 py-5 gradient-bg text-white font-black rounded-2xl shadow-xl uppercase text-[10px] tracking-widest hover:brightness-110 transition-all">Conferma Registrazione</button>
+                    <button id="submit-btn" onclick="submitBook()" class="flex-1 py-5 gradient-bg text-white font-black rounded-2xl shadow-xl uppercase text-[10px] tracking-widest hover:brightness-110 active:scale-95 transition-all glow-button">Conferma Registrazione</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="profile-modal" class="fixed inset-0 bg-black/35 z-[110] hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[2rem] shadow-2xl p-6 relative overflow-hidden transition-all transform scale-95 opacity-0 border-t-4 gold-border" style="max-height:90vh; overflow:auto;" id="profile-container">
-            <div class="mb-4">
+    <!-- Profile Edit Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 relative overflow-hidden transition-all transform scale-95 opacity-0 border-t-4 gold-border" style="max-height:90vh; overflow:auto;" id="profile-container">
+            <div class="mb-6">
                 <h3 class="font-black uppercase text-lg tracking-tighter italic text-[#73563d] serif">Il mio Profilo</h3>
                 <p class="text-[9px] text-stone-400 uppercase mt-1 tracking-widest">Modifica i tuoi dati (salvati localmente all'account)</p>
             </div>
@@ -220,56 +238,57 @@
             <div class="space-y-4 text-sm">
                 <div>
                     <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Tipo di Utente</label>
-                    <select id="profile-type" onchange="toggleUserTypeFields()" class="w-full bg-stone-50 border rounded-xl p-3 font-bold text-sm text-[#73563d] outline-none focus:border-[#c5ab8e]">
+                    <select id="profile-type" onchange="toggleUserTypeFields()" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 font-bold text-sm text-[#73563d] outline-none focus:border-[#c5ab8e]">
                         <option value="interno">Studente / Personale della Scuola</option>
                         <option value="esterno">Utente Esterno alla Scuola</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Nome</label>
-                    <input id="profile-name" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="Nome">
+                    <input id="profile-name" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 text-sm font-bold" placeholder="Nome">
                 </div>
                 <div>
                     <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Cognome</label>
-                    <input id="profile-surname" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="Cognome">
+                    <input id="profile-surname" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 text-sm font-bold" placeholder="Cognome">
                 </div>
                 <div id="wrapper-interno" class="space-y-4">
                     <div class="flex gap-3">
                         <div class="flex-1">
                             <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Classe</label>
-                            <input id="profile-class" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. 3">
+                            <input id="profile-class" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 text-sm font-bold" placeholder="es. 3">
                         </div>
                         <div class="flex-1">
                             <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Sezione</label>
-                            <input id="profile-section" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. A">
+                            <input id="profile-section" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 text-sm font-bold" placeholder="es. A">
                         </div>
                     </div>
                     <div>
                         <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Anno scolastico</label>
-                        <input id="profile-year" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. 2025/2026">
+                        <input id="profile-year" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 text-sm font-bold" placeholder="es. 2025/2026">
                     </div>
                 </div>
                 <div id="wrapper-esterno" class="space-y-4 hidden">
                     <div class="flex gap-3">
                         <div class="flex-1">
                             <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Età</label>
-                            <input id="profile-age" type="number" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. 24">
+                            <input id="profile-age" type="number" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 text-sm font-bold" placeholder="es. 24">
                         </div>
                         <div class="flex-1">
                             <label class="block text-[9px] font-black uppercase text-stone-400 mb-1 tracking-widest">Provenienza / Città</label>
-                            <input id="profile-provenance" class="w-full bg-stone-50 border rounded-xl p-3 text-sm" placeholder="es. Francavilla Fontana">
+                            <input id="profile-provenance" class="w-full bg-stone-50 border border-stone-150 rounded-xl p-3 text-sm font-bold" placeholder="es. Francavilla Fontana">
                         </div>
                     </div>
                 </div>
 
                 <div class="flex gap-3 pt-4">
-                    <button onclick="closeProfileModal()" class="flex-1 py-3 font-black text-stone-500 uppercase text-[10px] tracking-widest hover:text-stone-700 transition-colors">Annulla</button>
-                    <button id="save-profile-btn" onclick="saveProfile()" class="flex-1 py-3 bg-[#73563d] text-white font-black rounded-xl uppercase text-[10px] tracking-widest hover:brightness-110">Salva</button>
+                    <button onclick="closeProfileModal()" class="flex-1 py-3 font-black text-[#a38a75] uppercase text-[10px] tracking-widest hover:text-stone-700 transition-colors">Annulla</button>
+                    <button id="save-profile-btn" onclick="saveProfile()" class="flex-1 py-3 bg-[#73563d] text-white font-black rounded-xl uppercase text-[10px] tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-md">Salva</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Error/Notice Toast -->
     <div id="error-toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl z-[300] hidden animate-card border-b-4 border-red-800">
         <div class="flex items-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
@@ -634,24 +653,40 @@
 
             validBooks.forEach(book => {
                 const isDisponibile = book.status === 'disponibile';
-                const badgeColor = isDisponibile ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100';
+                const badgeColor = isDisponibile ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200';
                 
                 let actionButton = "";
                 if (isDisponibile) {
                     actionButton = `
-                        <div class="flex flex-col gap-2 mt-4">
-                            <button onclick="borrowBook('${book.id}')" class="w-full bg-[#73563d] text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Prendi in Prestito</button>
-                            <button onclick="openExchangeModal('${book.id}')" class="w-full bg-[#a38a75] text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Scambia Libro</button>
+                        <div class="flex flex-col gap-2 mt-5">
+                            <button onclick="borrowBook('${book.id}')" class="w-full bg-[#73563d] text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                Prendi in Prestito
+                            </button>
+                            <button onclick="openExchangeModal('${book.id}')" class="w-full bg-amber-600 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m16 3 4 4-4 4"></path><path d="M20 7H9a4 4 0 0 0-4 4v10"></path></svg>
+                                Scambia Libro
+                            </button>
                         </div>
                     `;
                 } else if (book.currentHolder === currentUserEmail) {
-                    actionButton = `<button onclick="returnBook('${book.id}')" class="w-full mt-4 bg-stone-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 transition-all">Restituisci Libro</button>`;
+                    actionButton = `
+                        <button onclick="returnBook('${book.id}')" class="w-full mt-5 bg-stone-800 text-white font-black text-[10px] uppercase tracking-wider py-3 rounded-xl shadow-md hover:brightness-110 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            Restituisci Libro
+                        </button>
+                    `;
                 } else {
-                    actionButton = `<button disabled class="w-full mt-4 bg-stone-100 text-stone-400 font-black text-[10px] uppercase tracking-wider py-3 rounded-xl border border-stone-200 cursor-not-allowed">In prestito a un collega</button>`;
+                    actionButton = `
+                        <button disabled class="w-full mt-5 bg-stone-100 text-stone-400 font-black text-[10px] uppercase tracking-wider py-3 rounded-xl border border-stone-200 cursor-not-allowed flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-50"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            In prestito ad un collega
+                        </button>
+                    `;
                 }
 
                 grid.innerHTML += `
-                    <div class="bg-white rounded-[2rem] border border-stone-100 p-6 shadow-sm book-card animate-card">
+                    <div class="bg-white rounded-[2rem] border border-stone-100 p-6 shadow-sm book-card animate-card glow-soft">
                         <div class="flex justify-between items-start gap-4 mb-4">
                             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${badgeColor}">${book.status}</span>
                             <span class="text-[10px] text-stone-400 font-bold">${book.date}</span>
@@ -659,7 +694,7 @@
                         <h4 class="font-black text-xl text-[#73563d] tracking-tight leading-tight mb-1 serif">${book.title}</h4>
                         <p class="text-stone-500 text-xs font-bold uppercase tracking-wide mb-4">${book.author}</p>
                         <div class="pt-4 border-t border-stone-50 text-[11px] text-stone-400">
-                            <span class="font-medium">Donato da:</span> <span class="font-bold text-slate-600">${book.donor}</span>
+                            <span class="font-medium">Donato da:</span> <span class="font-bold text-[#73563d]">${book.donor}</span>
                         </div>
                         ${actionButton}
                     </div>
@@ -679,11 +714,28 @@
             }
 
             movementsList.forEach(m => {
+                let badgeStyle = "bg-stone-100 text-stone-700 border-stone-200";
+                if(m.azione === "DONAZIONE") badgeStyle = "bg-emerald-50 text-emerald-800 border-emerald-100";
+                if(m.azione === "SCAMBIO") badgeStyle = "bg-amber-50 text-amber-800 border-amber-100";
+                if(m.azione === "RITIRO") badgeStyle = "bg-orange-50 text-orange-800 border-orange-100";
+
                 body.innerHTML += `
                     <tr class="border-b border-stone-50 hover:bg-stone-50/50 transition-colors history-row">
                         <td class="p-6 text-stone-500 font-medium">${m.timestamp}</td>
-                        <td class="p-6 font-bold text-stone-800">${m.utente} <span class="block text-[10px] font-medium text-stone-400">${m.user_email}</span></td>
-                        <td class="p-6"><span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide bg-stone-100 text-stone-700">${m.azione}</span></td>
+                        <td class="p-6 font-bold text-stone-800">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-[#73563d]/10 text-[#73563d] flex items-center justify-center font-black text-xs">
+                                    ${m.utente.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    ${m.utente}
+                                    <span class="block text-[10px] font-medium text-stone-400">${m.user_email}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-6">
+                            <span class="px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest border ${badgeStyle}">${m.azione}</span>
+                        </td>
                         <td class="p-6 text-stone-600 font-medium italic">${m.titolo}</td>
                     </tr>
                 `;
@@ -705,7 +757,7 @@
             });
 
             if (view === 'catalog') {
-                if(catalogBtn) catalogBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]";
+                if(catalogBtn) catalogBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d] border border-stone-100";
                 if(grid) grid.classList.remove('hidden');
                 if(history) history.classList.add('hidden');
                 if(searchBar) searchBar.classList.remove('hidden');
@@ -714,7 +766,7 @@
                 const availableBooks = allBooks.filter(b => b.status === 'disponibile');
                 renderBooks(availableBooks);
             } else if (view === 'my-books') {
-                if(myBooksBtn) myBooksBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]";
+                if(myBooksBtn) myBooksBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d] border border-stone-100";
                 if(grid) grid.classList.remove('hidden');
                 if(history) history.classList.add('hidden');
                 if(searchBar) searchBar.classList.add('hidden');
@@ -723,7 +775,7 @@
                 const myBooks = allBooks.filter(b => b.currentHolder === currentUserEmail);
                 renderBooks(myBooks);
             } else if (view === 'history') {
-                if(historyBtn) historyBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d]";
+                if(historyBtn) historyBtn.className = "px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-white shadow-md text-[#73563d] border border-stone-100";
                 if(grid) grid.classList.add('hidden');
                 if(history) history.classList.remove('hidden');
                 if(searchBar) searchBar.className = "hidden";
@@ -814,6 +866,7 @@
             }
         }
 
+        // Chiude la finestra modale
         function closeModal() {
             const modal = document.getElementById('modal');
             const container = document.getElementById('modal-container');
@@ -971,6 +1024,6 @@
         }
     </script>
 
-    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-[#a38a75] select-none">Progettato da Giovanni Rochira</footer>
+    <footer class="fixed bottom-2 left-0 right-0 text-center text-[11px] text-[#a38a75] select-none font-bold">Progettato da Giovanni Rochira</footer>
 </body>
 </html>
