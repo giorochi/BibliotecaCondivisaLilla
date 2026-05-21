@@ -991,41 +991,115 @@
         }
 
         // Gestisce l'invio e dirotterà l'azione a seconda della modalità (Inserimento o Scambio)
-        function submitBook() {
-            const btn = document.getElementById('submit-btn');
-            const titleInput = document.getElementById('book-title');
-            const authorInput = document.getElementById('book-author');
+       async function submitBook() {
+    const btn = document.getElementById('submit-btn');
+    const titleInput = document.getElementById('book-title');
+    const authorInput = document.getElementById('book-author');
 
-            if(!titleInput || !authorInput) return;
+    if(!titleInput || !authorInput) return;
 
-            const newTitle = titleInput.value.trim();
-            const newAuthor = authorInput.value.trim();
+    const newTitle = titleInput.value.trim();
+    const newAuthor = authorInput.value.trim();
 
-            if (!newTitle || !newAuthor) {
-                alert("Per favore, compila sia il titolo che l'autore!");
-                return;
-            }
+    if (!newTitle || !newAuthor) {
+        alert("Per favore, compila sia il titolo che l'autore!");
+        return;
+    }
 
-            if(btn) btn.disabled = true;
+    if(btn) btn.disabled = true;
 
-            if (currentExchangeBookId) {
-                window.google.script.run.withSuccessHandler(function() {
-                    closeModal();
-                    initApp();
-                    alert("Scambio completato con successo!");
-                }).withFailureHandler(function(err){
-                    if(btn) btn.disabled = false;
-                }).exchangeBook(currentExchangeBookId, newTitle, newAuthor);
-            } else {
-                const payload = { title: newTitle, authors: newAuthor, subject: "" };
-                window.google.script.run.withSuccessHandler(function() {
-                    closeModal();
-                    initApp();
-                }).withFailureHandler(function(err) {
-                    if(btn) btn.disabled = false;
-                }).addBook(payload);
-            }
+    try {
+        if (currentExchangeBookId) {
+            // 1. Aggiorna lo stato del vecchio libro in 'scambiato'
+            const { error: updateError } = await supabaseClient
+                .from('books')
+                .update({ 
+                    status: 'scambiato', 
+                    borrower_email: currentUserEmail 
+                })
+                .eq('id', currentExchangeBookId);
+
+            if(updateError) throw updateError;
+
+            // 2. Inserisce il nuovo libro messo a disposizione in cambio
+            const { error: insertError } = await supabaseClient
+                .from('books')
+                .insert([
+                    {
+                        title: newTitle,
+                        authors: newAuthor,
+                        owner_email: currentUserEmail,
+                        owner_name: currentUserName,
+                        status: 'disponibile',
+                        timestamp: new Date().toISOString()
+                    }
+                ]);
+
+            if(insertError) throw insertError;
+
+            // 3. Registra il movimento di SCAMBIO
+            const { error: movError } = await supabaseClient
+                .from('movements')
+                .insert([
+                    {
+                        operator_email: currentUserEmail,
+                        operator_name: currentUserName,
+                        type: 'SCAMBIO',
+                        book_title: newTitle,
+                        timestamp: new Date().toISOString()
+                    }
+                ]);
+
+            if(movError) throw movError;
+            alert("Scambio completato con successo!");
+
+        } else {
+            // 1. Inserisce il libro donato
+            const { error: insertError } = await supabaseClient
+                .from('books')
+                .insert([
+                    {
+                        title: newTitle,
+                        authors: newAuthor,
+                        owner_email: currentUserEmail,
+                        owner_name: currentUserName,
+                        status: 'disponibile',
+                        timestamp: new Date().toISOString()
+                    }
+                ]);
+
+            if(insertError) throw insertError;
+
+            // 2. Registra il movimento di DONAZIONE
+            const { error: movError } = await supabaseClient
+                .from('movements')
+                .insert([
+                    {
+                        operator_email: currentUserEmail,
+                        operator_name: currentUserName,
+                        type: 'DONAZIONE',
+                        book_title: newTitle,
+                        timestamp: new Date().toISOString()
+                    }
+                ]);
+
+            if(movError) throw movError;
+            alert("Libro donato con successo!");
         }
+
+        // Resetta i campi del form, chiude il popup e aggiorna i dati a schermo
+        titleInput.value = "";
+        authorInput.value = "";
+        closeModal();
+        await initApp();
+
+    } catch (err) {
+        console.error("Errore durante il salvataggio:", err);
+        alert("Errore durante il salvataggio: " + err.message);
+    } finally {
+        if(btn) btn.disabled = false;
+    }
+}
         async function handleLogout() {
     if (confirm("Sei sicuro di voler uscire dal tuo account?")) {
         try {
