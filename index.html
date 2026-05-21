@@ -88,18 +88,18 @@
 <body class="bg-[#fcfdfe] text-slate-900 min-h-screen">
 
     <div id="loader" class="fixed inset-0 bg-white z-[200] flex flex-col items-center justify-center transition-opacity duration-500">
-        <img src="https://iisslilla.edu.it/wp-content/uploads/sites/996/lilla.png?x79845" alt="Logo Lilla" class="h-24 mb-6 animate-pulse">
+        <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Lilla" class="h-24 mb-6 animate-pulse">
         <div class="loader-spin mb-4"></div>
-        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-blue-900 italic">Ponzini Hub - Liceo Lilla</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-blue-900 italic">Pagine Condivise - Liceo Lilla</p>
     </div>
 
     <header class="bg-white/90 backdrop-blur-md border-b-4 gold-border p-4 sticky top-0 z-50 shadow-md">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-5">
-                <img src="https://iisslilla.edu.it/wp-content/uploads/sites/996/lilla.png?x79845" alt="Logo Scuola" class="h-16 hidden sm:block">
+                <img src="https://i.postimg.cc/tJC91Ygg/Whats-App-Image-2026-05-21-at-12-47-30.jpg" alt="Logo Scuola" class="h-16 hidden sm:block">
                 <div class="h-12 w-[2px] bg-slate-100 hidden sm:block"></div>
                 <div>
-                    <h1 class="text-xl font-black tracking-tighter uppercase italic leading-none text-blue-900 serif">Ponzini Hub</h1>
+                    <h1 class="text-xl font-black tracking-tighter uppercase italic leading-none text-blue-900 serif">Pagine Condivise</h1>
                     <p class="text-[9px] font-bold text-amber-600 uppercase tracking-[0.2em] mt-1">I.I.S.S. "Vincenzo Lilla"</p>
                 </div>
             </div>
@@ -126,7 +126,7 @@
                     <span class="text-amber-600 font-black uppercase text-[10px] tracking-[0.3em]">Biblioteca Scolastica</span>
                 </div>
                 <h2 id="view-title" class="text-5xl font-black tracking-tighter uppercase italic text-blue-900 serif mb-4">Catalogo Libri</h2>
-                <p class="text-slate-400 text-xs font-medium max-w-md">Sistema di scambio e condivisione per gli studenti del Liceo Classico e Scientifico "Vincenzo Lilla".</p>
+                <p class="text-slate-400 text-xs font-medium max-w-md">Sistema di scambio e condivisione per gli studenti del Liceo Classico "Vincenzo Lilla".</p>
             </div>
             
             <div class="flex flex-wrap gap-3 w-full lg:w-auto bg-slate-50 p-2 rounded-[2rem] border border-slate-100 shadow-inner items-center">
@@ -205,6 +205,13 @@
 
             <div class="space-y-4 text-sm">
                 <div>
+    <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Tipo di Utente</label>
+    <select id="profile-type" onchange="toggleUserTypeFields()" class="w-full bg-slate-50 border rounded-xl p-3 font-bold text-sm text-blue-900 outline-none focus:border-amber-500">
+        <option value="interno">Studente / Personale della Scuola</option>
+        <option value="esterno">Utente Esterno alla Scuola</option>
+    </select>
+</div>
+                <div>
                     <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Nome</label>
                     <input id="profile-name" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="Nome">
                 </div>
@@ -226,6 +233,18 @@
                     <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Anno scolastico</label>
                     <input id="profile-year" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 2025/2026">
                 </div>
+                <div id="wrapper-esterno" class="space-y-4 hidden">
+    <div class="flex gap-3">
+        <div class="flex-1">
+            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Età</label>
+            <input id="profile-age" type="number" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. 24">
+        </div>
+        <div class="flex-1">
+            <label class="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-widest">Provenienza / Città</label>
+            <input id="profile-provenance" class="w-full bg-slate-50 border rounded-xl p-3 text-sm" placeholder="es. Francavilla Fontana">
+        </div>
+    </div>
+</div>
 
                 <div class="flex gap-3 pt-4">
                     <button onclick="closeProfileModal()" class="flex-1 py-3 font-black text-slate-500 uppercase text-[10px] tracking-widest hover:text-slate-700 transition-colors">Annulla</button>
@@ -508,13 +527,15 @@ await supabaseClient.auth.signInWithOAuth({
                         try {
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                             const { data, error } = await localClient.from('profiles').upsert({
-                                email: currentUserEmail,
-                                name: payload.name,
-                                surname: payload.surname,
-                                class: payload.class,
-                                section: payload.section,
-                                year: payload.year
-                            });
+    email: currentUserEmail,
+    name: payload.name,
+    surname: payload.surname,
+    class: payload.class || null,
+    section: payload.section || null,
+    year: payload.year || null,
+    age: payload.age || null,
+    provenance: payload.provenance || null
+});
                             if (error) throw error;
                             if (this.successCallback) this.successCallback(data);
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
@@ -564,6 +585,20 @@ await supabaseClient.auth.signInWithOAuth({
 
             }).loadAllData();
         }
+
+        function toggleUserTypeFields() {
+    const type = document.getElementById('profile-type').value;
+    const internoWrapper = document.getElementById('wrapper-interno');
+    const esternoWrapper = document.getElementById('wrapper-esterno');
+    
+    if (type === 'esterno') {
+        if(internoWrapper) internoWrapper.classList.add('hidden');
+        if(esternoWrapper) esternoWrapper.classList.remove('hidden');
+    } else {
+        if(internoWrapper) internoWrapper.classList.remove('hidden');
+        if(esternoWrapper) esternoWrapper.classList.add('hidden');
+    }
+}
 
         // Genera visivamente le schede dei libri nel catalogo dinamico
         function renderBooks(booksList) {
@@ -801,12 +836,21 @@ await supabaseClient.auth.signInWithOAuth({
                 
                 window.google.script.run.withSuccessHandler(function(profile) {
                     if(profile) {
-                        document.getElementById('profile-name').value = profile.name || '';
-                        document.getElementById('profile-surname').value = profile.surname || '';
-                        document.getElementById('profile-class').value = profile.class || '';
-                        document.getElementById('profile-section').value = profile.section || '';
-                        document.getElementById('profile-year').value = profile.year || '';
-                    }
+    document.getElementById('profile-name').value = profile.name || '';
+    document.getElementById('profile-surname').value = profile.surname || '';
+    
+    if (profile.provenance) {
+        document.getElementById('profile-type').value = 'esterno';
+        document.getElementById('profile-age').value = profile.age || '';
+        document.getElementById('profile-provenance').value = profile.provenance || '';
+    } else {
+        document.getElementById('profile-type').value = 'interno';
+        document.getElementById('profile-class').value = profile.class || '';
+        document.getElementById('profile-section').value = profile.section || '';
+        document.getElementById('profile-year').value = profile.year || '';
+    }
+    toggleUserTypeFields();
+}
                 }).getProfile();
             }
         }
@@ -821,38 +865,60 @@ await supabaseClient.auth.signInWithOAuth({
         }
 
        function saveProfile() {
-            const nameVal = document.getElementById('profile-name').value.trim();
-            const surnameVal = document.getElementById('profile-surname').value.trim();
-            const classVal = document.getElementById('profile-class').value.trim();
-            const sectionVal = document.getElementById('profile-section').value.trim();
-            const yearVal = document.getElementById('profile-year').value.trim();
+    const userType = document.getElementById('profile-type').value;
+    const nameVal = document.getElementById('profile-name').value.trim();
+    const surnameVal = document.getElementById('profile-surname').value.trim();
 
-            if (!nameVal || !surnameVal || !classVal || !yearVal) {
-                alert("Tutti i campi (Nome, Cognome, Classe e Anno Scolastico) sono obbligatori per registrarsi!");
-                return;
-            }
+    if (!nameVal || !surnameVal) {
+        alert("Nome e Cognome sono campi obbligatori!");
+        return;
+    }
 
-            const payload = { name: nameVal, surname: surnameVal, class: classVal, section: sectionVal, year: yearVal };
+    let payload = { name: nameVal, surname: surnameVal };
 
-            window.google.script.run.withSuccessHandler(function() {
-                // Aggiorna l'interfaccia con Nome Cognome (ClasseSezione)
-                let currentUserFullName = `${payload.name} ${payload.surname} (${payload.class}${payload.section || ''})`;
-                if (document.getElementById('user-display')) {
-                    document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
-                }
-                
-                // Aggiorna la lettera dell'avatar
-                const avatar = document.getElementById('avatar');
-                if (avatar && payload.name) {
-                    avatar.innerText = payload.name.charAt(0).toUpperCase();
-                }
-                
-                // Chiude il popup e rinfresca i dati dell'applicazione
-                closeProfileModal();
-                alert("Profilo registrato con successo! Ora puoi usare l'app.");
-                initApp(); 
-            }).saveProfile(payload);
+    if (userType === 'interno') {
+        const classVal = document.getElementById('profile-class').value.trim();
+        const sectionVal = document.getElementById('profile-section').value.trim();
+        const yearVal = document.getElementById('profile-year').value.trim();
+
+        if (!classVal || !yearVal) {
+            alert("I campi Classe e Anno Scolastico sono obbligatori per gli studenti!");
+            return;
         }
+        payload.class = classVal;
+        payload.section = sectionVal;
+        payload.year = yearVal;
+    } else {
+        const ageVal = document.getElementById('profile-age').value.trim();
+        const provenanceVal = document.getElementById('profile-provenance').value.trim();
+
+        if (!provenanceVal) {
+            alert("Il campo Provenienza è obbligatorio per gli utenti esterni!");
+            return;
+        }
+        payload.age = ageVal ? parseInt(ageVal) : null;
+        payload.provenance = provenanceVal;
+    }
+
+    window.google.script.run.withSuccessHandler(function() {
+        let currentUserFullName = userType === 'interno' ? 
+            `${payload.name} ${payload.surname} (${payload.class}${payload.section || ''})` : 
+            `${payload.name} ${payload.surname} (Esterno)`;
+
+        if (document.getElementById('user-display')) {
+            document.getElementById('user-display').innerText = currentUserFullName.toUpperCase();
+        }
+        
+        const avatar = document.getElementById('avatar');
+        if (avatar && payload.name) {
+            avatar.innerText = payload.name.charAt(0).toUpperCase();
+        }
+        
+        closeProfileModal();
+        alert("Profilo aggiornato con successo!");
+        initApp(); 
+    }).saveProfile(payload);
+}
 
         // Gestisce l'invio e dirotterà l'azione a seconda della modalità (Inserimento o Scambio)
         function submitBook() {
