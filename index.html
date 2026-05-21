@@ -675,6 +675,7 @@
         }
 
         // Rendering Griglia Catalogo Libri
+       // Rendering Griglia Catalogo Libri
         function renderGrid(books) {
             const grid = document.getElementById('books-grid');
             if(!grid) return;
@@ -682,21 +683,28 @@
                 grid.innerHTML = `<div class="col-span-full text-center text-slate-400 py-12 italic text-sm">Nessun libro trovato</div>`;
                 return;
             }
-            grid.innerHTML = books.map(b => `
+            grid.innerHTML = books.map(b => {
+                // Puliamo lo stato per sicurezza prima del controllo
+                const currentStatus = String(b.status || "").trim().toLowerCase();
+                const isDisponibile = currentStatus === 'disponibile';
+
+                return `
                 <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm book-card animate-card flex flex-col justify-between">
                     <div>
-                        <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${b.status === 'disponibile' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">${b.status}</span>
+                        <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${isDisponibile ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">${b.status}</span>
                         <h4 class="text-2xl font-black tracking-tight uppercase italic text-blue-900 serif mt-4 mb-1">${b.title}</h4>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">${b.author}</p>
                     </div>
                     <div class="pt-6 border-t border-slate-50 flex flex-col gap-3 text-[11px] font-medium text-slate-400">
-                        <div>Dona: <strong class="text-slate-700 font-bold">${b.donor}</strong></div>
-                        ${b.status === 'disponibile' ? 
-                            `<button onclick="initiateExchange('${b.id}', '${b.title.replace(/'/g, "\\'")}')" class="w-full text-center py-2 bg-blue-50 text-blue-900 font-bold rounded-xl uppercase text-[9px] tracking-wider hover:bg-blue-100 transition-colors">Richiedi Scambio</button>` : ''
+                        <div>Donato da: <strong class="text-slate-700 font-bold">${b.donor}</strong></div>
+                        ${isDisponibile ? 
+                            `<button onclick="initiateExchange('${b.id}', '${b.title.replace(/'/g, "\\'")}')" class="w-full text-center py-3 bg-blue-50 text-blue-900 font-bold rounded-xl uppercase text-[9px] tracking-wider hover:bg-blue-100 transition-colors cursor-pointer" style="min-height: 38px;">Richiedi Scambio</button>` : 
+                            `<span class="text-center py-2 text-stone-400 italic">Non disponibile per lo scambio</span>`
                         }
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Rendering Storico Tabella Movimenti
