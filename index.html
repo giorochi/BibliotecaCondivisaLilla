@@ -565,6 +565,7 @@
                     saveProfile: async function(payload) {
                         try {
                             const localClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                            // CORRETTO: Aggiunto .select().single() alla fine per costringere Supabase a restituire il profilo salvato
                             const { data, error } = await localClient.from('profiles').upsert({
                                 email: currentUserEmail,
                                 name: payload.name,
@@ -574,14 +575,12 @@
                                 year: payload.year || null,
                                 age: payload.age || null,
                                 provenance: payload.provenance || null
-                            });
+                            }).select().single();
+                            
                             if (error) throw error;
                             if (this.successCallback) this.successCallback(data);
                         } catch(e) { if (this.failureCallback) this.failureCallback(e); }
                     }
-                }
-            }
-        };
 
         // VARIABILI GLOBALI PER I DATI (Lasciale così come sono)
         let allBooks = [];
