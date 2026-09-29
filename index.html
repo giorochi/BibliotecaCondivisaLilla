@@ -345,12 +345,17 @@
             }
         });
 
-        async function handleLogout() {
-  const { error } = await supabaseClient.auth.signOut();
-  if (error) console.error('Errore durante il logout:', error.message);
-  else window.location.href = '/login'; // O il reindirizzamento desiderato
+async function handleLogout() {
+    try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+        // Ricarica la pagina corrente
+        window.location.reload();
+    } catch (err) {
+        console.error("Errore durante il logout:", err);
+        alert("Errore durante la disconnessione: " + err.message);
+    }
 }
-
         // Funzione per avviare l'applicazione e sbloccare il loader
         function initApp() {
             google.script.run.withSuccessHandler(function(data) {
